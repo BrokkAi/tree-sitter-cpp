@@ -25,6 +25,59 @@ Include directives
         (identifier)))))
 
 ================================================================================
+Windows quoted include paths preserve other path forms and string escapes
+================================================================================
+
+#include "C:\Users\ADMINI~1\include\helper.h"
+#include "C:/Users/ADMINI~1/include/helper.h"
+#include ""
+#include <windows.h>
+#include HEADER
+#include HEADER(arg1, arg2)
+const char *valid_escape = "line\n";
+const char *invalid_unicode_escape = "\U0000004";
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (preproc_include
+    path: (string_literal
+      (string_content)))
+  (preproc_include
+    path: (string_literal
+      (string_content)))
+  (preproc_include
+    path: (string_literal))
+  (preproc_include
+    path: (system_lib_string))
+  (preproc_include
+    path: (identifier))
+  (preproc_include
+    path: (call_expression
+      function: (identifier)
+      arguments: (argument_list
+        (identifier)
+        (identifier))))
+  (declaration
+    (type_qualifier)
+    type: (primitive_type)
+    declarator: (init_declarator
+      declarator: (pointer_declarator
+        declarator: (identifier))
+      value: (string_literal
+        (string_content)
+        (escape_sequence))))
+  (declaration
+    (type_qualifier)
+    type: (primitive_type)
+    declarator: (init_declarator
+      declarator: (pointer_declarator
+        declarator: (identifier))
+      value: (string_literal
+        (ERROR
+          (UNEXPECTED '"'))))))
+
+================================================================================
 Object-like macro definitions
 ================================================================================
 

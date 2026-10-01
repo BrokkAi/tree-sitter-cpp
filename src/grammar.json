@@ -250,7 +250,7 @@
           "type": "ALIAS",
           "content": {
             "type": "PATTERN",
-            "value": "#[ \t]*include"
+            "value": "#[ \\t]*include"
           },
           "named": false,
           "value": "#include"
@@ -261,6 +261,15 @@
           "content": {
             "type": "CHOICE",
             "members": [
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_quoted_header_name"
+                },
+                "named": true,
+                "value": "string_literal"
+              },
               {
                 "type": "SYMBOL",
                 "name": "string_literal"
@@ -11008,6 +11017,35 @@
           }
         ]
       }
+    },
+    "_quoted_header_name": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "\""
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "IMMEDIATE_TOKEN",
+            "content": {
+              "type": "PREC",
+              "value": 1,
+              "content": {
+                "type": "PATTERN",
+                "value": "[^\"\\r\\n]*\\\\[^\"\\r\\n]*"
+              }
+            }
+          },
+          "named": true,
+          "value": "string_content"
+        },
+        {
+          "type": "STRING",
+          "value": "\""
+        }
+      ]
     },
     "placeholder_type_specifier": {
       "type": "PREC",

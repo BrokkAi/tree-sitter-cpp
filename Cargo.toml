@@ -1,7 +1,7 @@
 [package]
-name = "tree-sitter-cpp"
-description = "C++ grammar for tree-sitter"
-version = "0.23.4"
+name = "brokk-tree-sitter-cpp"
+description = "Brokk-maintained C++ grammar for the tree-sitter parsing library"
+version = "0.23.5"
 authors = [
   "Max Brunsfeld <maxbrunsfeld@gmail.com>",
   "Amaan Qureshi <amaanq12@gmail.com>",
@@ -10,7 +10,8 @@ license = "MIT"
 readme = "README.md"
 keywords = ["incremental", "parsing", "tree-sitter", "cpp"]
 categories = ["parsing", "text-editors"]
-repository = "https://github.com/tree-sitter/tree-sitter-cpp"
+repository = "https://github.com/BrokkAi/tree-sitter-cpp"
+homepage = "https://github.com/BrokkAi/tree-sitter-cpp"
 edition = "2021"
 autoexamples = false
 
@@ -18,6 +19,7 @@ build = "bindings/rust/build.rs"
 include = [
   "bindings/rust/*",
   "./grammar.js",
+  "LICENSE",
   "queries/*",
   "src/*",
   "tree-sitter.json",

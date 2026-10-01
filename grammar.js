@@ -106,6 +106,22 @@ module.exports = grammar(C, {
   ],
 
   rules: {
+    preproc_include: $ => seq(
+      alias(/#[ \t]*include/, '#include'),
+      field('path', choice(
+        alias($._quoted_header_name, $.string_literal),
+        $.string_literal,
+        $.system_lib_string,
+        $.identifier,
+        alias($.preproc_call_expression, $.call_expression),
+      )),
+      token.immediate(/\r?\n/),
+    ),
+    _quoted_header_name: $ => seq(
+      '"',
+      alias(token.immediate(prec(1, /[^"\r\n]*\\[^"\r\n]*/)), $.string_content),
+      '"',
+    ),
     _top_level_item: ($, original) => choice(
       ...original.members.filter((member) => member.content?.name != '_old_style_function_definition'),
       $.namespace_definition,

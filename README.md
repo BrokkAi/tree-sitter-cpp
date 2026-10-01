@@ -9,6 +9,10 @@
 
 C++ grammar for [tree-sitter](https://github.com/tree-sitter/tree-sitter).
 
+This repository carries Brokk's Rust crate fork from upstream `tree-sitter/tree-sitter-cpp` at commit `f41e1a044c8a84ea9fa8577fdd2eab92ec96de02` (0.23.4). Its Rust package is `brokk-tree-sitter-cpp` 0.23.5; Rust applications may depend on it under the familiar `tree-sitter-cpp` key with a Cargo package alias.
+
+To regenerate the ABI 14 parser, install the locked JavaScript dependencies (`npm ci`) and run `npx tree-sitter generate --abi 14`. The grammar extends the upstream C 0.23.1 grammar and uses Tree-sitter CLI 0.24.3. Run `npx tree-sitter test` to check the full corpus and highlighting suite.
+
 ## References
 
 - [Hyperlinked C++ BNF Grammar](http://www.nongnu.org/hcb/)

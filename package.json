@@ -1,8 +1,8 @@
 {
   "name": "tree-sitter-cpp",
   "version": "0.23.4",
-  "description": "C++ grammar for tree-sitter",
-  "repository": "https://github.com/tree-sitter/tree-sitter-cpp",
+  "description": "Brokk-maintained C++ grammar for tree-sitter",
+  "repository": "https://github.com/BrokkAi/tree-sitter-cpp",
   "license": "MIT",
   "author": {
     "name": "Max Brunsfeld",
@@ -35,13 +35,13 @@
   "dependencies": {
     "node-addon-api": "^8.2.1",
     "node-gyp-build": "^4.8.2",
-    "tree-sitter-c": "^0.23.1"
+    "tree-sitter-c": "0.23.1"
   },
   "devDependencies": {
     "eslint": "^9.12.0",
     "eslint-config-treesitter": "^1.0.2",
     "prebuildify": "^6.0.1",
-    "tree-sitter-cli": "^0.24.3"
+    "tree-sitter-cli": "0.24.3"
   },
   "peerDependencies": {
     "tree-sitter": "^0.21.1"

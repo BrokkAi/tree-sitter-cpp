@@ -1,13 +1,19 @@
 ============================================
-Line comments with escaped CRLF line endings
+Line comments with escaped CRLF and Windows include paths
 ============================================
 
 // hello \
    this is still a comment
 this_is_not a_comment;
+#include "C:\Users\ADMINI~1\include\helper.h"
 
 ---
 
 (translation_unit
   (comment)
-  (declaration (type_identifier) (identifier)))
+  (declaration
+    type: (type_identifier)
+    declarator: (identifier))
+  (preproc_include
+    path: (string_literal
+      (string_content))))
