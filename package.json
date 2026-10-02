@@ -1,6 +1,6 @@
 {
   "name": "tree-sitter-cpp",
-  "version": "0.23.4",
+  "version": "0.23.5",
   "description": "Brokk-maintained C++ grammar for tree-sitter",
   "repository": "https://github.com/BrokkAi/tree-sitter-cpp",
   "license": "MIT",
@@ -10,8 +10,7 @@
   },
   "maintainers": [
     {
-      "name": "Amaan Qureshi",
-      "email": "amaanq12@gmail.com"
+      "name": "Brokk"
     }
   ],
   "main": "bindings/node",
@@ -51,6 +50,10 @@
       "optional": true
     }
   },
+  "bugs": {
+    "url": "https://github.com/BrokkAi/tree-sitter-cpp/issues"
+  },
+  "homepage": "https://github.com/BrokkAi/tree-sitter-cpp#readme",
   "scripts": {
     "install": "node-gyp-build",
     "lint": "eslint grammar.js",

@@ -3,8 +3,8 @@ $(error Windows is not supported)
 endif
 
 LANGUAGE_NAME := tree-sitter-cpp
-HOMEPAGE_URL := https://github.com/tree-sitter/tree-sitter-cpp
-VERSION := 0.23.4
+HOMEPAGE_URL := https://github.com/BrokkAi/tree-sitter-cpp
+VERSION := 0.23.5
 
 # repository
 SRC_DIR := src

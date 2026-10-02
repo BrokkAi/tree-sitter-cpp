@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.13)
 
 project(tree-sitter-cpp
-        VERSION "0.23.4"
-        DESCRIPTION "C++ grammar for tree-sitter"
-        HOMEPAGE_URL "https://github.com/tree-sitter/tree-sitter-cpp"
+        VERSION "0.23.5"
+        DESCRIPTION "Brokk-maintained C++ grammar for tree-sitter"
+        HOMEPAGE_URL "https://github.com/BrokkAi/tree-sitter-cpp"
         LANGUAGES C)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)

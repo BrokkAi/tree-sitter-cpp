@@ -1,4 +1,4 @@
-module github.com/tree-sitter/tree-sitter-cpp
+module github.com/BrokkAi/tree-sitter-cpp
 
 go 1.22
 

@@ -1,35 +1,36 @@
-name: Publish packages
+name: Publish Rust crate
 
 on:
-  push:
-    tags: ["*"]
+  workflow_dispatch:
+    inputs:
+      release_ref:
+        description: Immutable release tag or commit to publish
+        required: true
+        type: string
 
 permissions:
-  contents: write
-  id-token: write
-  attestations: write
+  contents: read
 
 jobs:
-  github:
-    uses: tree-sitter/workflows/.github/workflows/release.yml@main
-    with:
-      generate: true
-      attestations: true
-  npm:
-    uses: tree-sitter/workflows/.github/workflows/package-npm.yml@main
-    secrets:
-      NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-    with:
-      generate: true
   crates:
-    uses: tree-sitter/workflows/.github/workflows/package-crates.yml@main
-    secrets:
-      CARGO_REGISTRY_TOKEN: ${{secrets.CARGO_REGISTRY_TOKEN}}
-    with:
-      generate: true
-  pypi:
-    uses: tree-sitter/workflows/.github/workflows/package-pypi.yml@main
-    secrets:
-      PYPI_API_TOKEN: ${{secrets.PYPI_API_TOKEN}}
-    with:
-      generate: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout immutable release ref
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ inputs.release_ref }}
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+      - name: Authenticate to crates.io
+        id: auth
+        uses: rust-lang/crates-io-auth-action@c6f97d42243bad5fab37ca0427f495c86d5b1a18 # v1.0.5
+      - name: Publish Brokk Rust crate
+        run: cargo publish --locked
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
