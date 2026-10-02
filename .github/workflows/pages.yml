@@ -38,9 +38,9 @@ jobs:
         run: |
           npx --yes --package=tree-sitter-cli@0.26.3 tree-sitter build --wasm
           npx --yes --package=tree-sitter-cli@0.26.3 tree-sitter playground --export site
-          mv site/tree-sitter-parser.wasm site/tree-sitter-cpp.wasm
           sed -i 's/LANGUAGE_BASE_URL = ""/LANGUAGE_BASE_URL = "."/' site/index.html
-          test -f site/tree-sitter-cpp.wasm
+          test -f site/tree-sitter-parser.wasm
+          grep -F '<option value="parser">' site/index.html
           grep -F 'LANGUAGE_BASE_URL = "."' site/index.html
           touch site/.nojekyll
       - name: Configure Pages
