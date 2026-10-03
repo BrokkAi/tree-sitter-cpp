@@ -1,0 +1,57 @@
+==================
+Conditional extern-C linkage guard with ifdef
+==================
+#ifdef __cplusplus
+extern "C" {
+#endif
+void f(void);
+#ifdef __cplusplus
+}
+#endif
+int after(void);
+
+------------------
+(translation_unit
+  (declaration
+    (primitive_type)
+    (function_declarator
+      (identifier)
+      (parameter_list
+        (parameter_declaration
+          (primitive_type)))))
+  (declaration
+    (primitive_type)
+    (function_declarator
+      (identifier)
+      (parameter_list
+        (parameter_declaration
+          (primitive_type))))))
+
+==================
+Conditional extern-C linkage guard with if-defined
+==================
+#if defined (__cplusplus)
+extern "C" {
+#endif
+void f(void);
+#if defined (__cplusplus)
+}
+#endif
+int after(void);
+
+------------------
+(translation_unit
+  (declaration
+    (primitive_type)
+    (function_declarator
+      (identifier)
+      (parameter_list
+        (parameter_declaration
+          (primitive_type)))))
+  (declaration
+    (primitive_type)
+    (function_declarator
+      (identifier)
+      (parameter_list
+        (parameter_declaration
+          (primitive_type))))))

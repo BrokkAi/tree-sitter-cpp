@@ -68,6 +68,14 @@
         },
         {
           "type": "SYMBOL",
+          "name": "_preproc_linkage_start"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_preproc_linkage_end"
+        },
+        {
+          "type": "SYMBOL",
           "name": "namespace_definition"
         },
         {
@@ -11046,6 +11054,147 @@
           "value": "\""
         }
       ]
+    },
+    "_preproc_linkage_ifdef": {
+      "type": "ALIAS",
+      "content": {
+        "type": "TOKEN",
+        "content": {
+          "type": "PREC",
+          "value": 1,
+          "content": {
+            "type": "PATTERN",
+            "value": "#[ \\t]*ifdef[ \\t]+__cplusplus[ \\t]*\\r?\\n"
+          }
+        }
+      },
+      "named": false,
+      "value": "#ifdef"
+    },
+    "_preproc_linkage_if": {
+      "type": "ALIAS",
+      "content": {
+        "type": "TOKEN",
+        "content": {
+          "type": "PREC",
+          "value": 1,
+          "content": {
+            "type": "PATTERN",
+            "value": "#[ \\t]*if[ \\t]+defined[ \\t]*(?:\\([ \\t]*__cplusplus[ \\t]*\\)|__cplusplus)[ \\t]*\\r?\\n"
+          }
+        }
+      },
+      "named": false,
+      "value": "#if"
+    },
+    "_preproc_linkage_endif": {
+      "type": "ALIAS",
+      "content": {
+        "type": "TOKEN",
+        "content": {
+          "type": "PREC",
+          "value": 1,
+          "content": {
+            "type": "PATTERN",
+            "value": "#[ \\t]*endif[ \\t]*\\r?\\n"
+          }
+        }
+      },
+      "named": false,
+      "value": "#endif"
+    },
+    "_extern_c_string": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "\"C\""
+        }
+      }
+    },
+    "_preproc_linkage_start": {
+      "type": "PREC",
+      "value": 1,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "_preproc_linkage_ifdef"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_preproc_linkage_if"
+              }
+            ]
+          },
+          {
+            "type": "STRING",
+            "value": "extern"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "_extern_c_string"
+          },
+          {
+            "type": "STRING",
+            "value": "{"
+          },
+          {
+            "type": "IMMEDIATE_TOKEN",
+            "content": {
+              "type": "PATTERN",
+              "value": "[ \\t]*\\r?\\n"
+            }
+          },
+          {
+            "type": "SYMBOL",
+            "name": "_preproc_linkage_endif"
+          }
+        ]
+      }
+    },
+    "_preproc_linkage_end": {
+      "type": "PREC",
+      "value": 1,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "_preproc_linkage_ifdef"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_preproc_linkage_if"
+              }
+            ]
+          },
+          {
+            "type": "STRING",
+            "value": "}"
+          },
+          {
+            "type": "IMMEDIATE_TOKEN",
+            "content": {
+              "type": "PATTERN",
+              "value": "[ \\t]*\\r?\\n"
+            }
+          },
+          {
+            "type": "SYMBOL",
+            "name": "_preproc_linkage_endif"
+          }
+        ]
+      }
     },
     "placeholder_type_specifier": {
       "type": "PREC",

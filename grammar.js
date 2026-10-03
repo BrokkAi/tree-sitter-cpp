@@ -124,6 +124,8 @@ module.exports = grammar(C, {
     ),
     _top_level_item: ($, original) => choice(
       ...original.members.filter((member) => member.content?.name != '_old_style_function_definition'),
+      $._preproc_linkage_start,
+      $._preproc_linkage_end,
       $.namespace_definition,
       $.concept_definition,
       $.namespace_alias_definition,
@@ -136,6 +138,42 @@ module.exports = grammar(C, {
       alias($.operator_cast_definition, $.function_definition),
       alias($.operator_cast_declaration, $.declaration),
     ),
+
+    // C++ headers commonly split an extern "C" linkage specification across
+    // preprocessor branches. Treat those two exact fragments as top-level
+    // syntax so declarations between them remain ordinary declarations.
+    _preproc_linkage_ifdef: _ => alias(
+      token(prec(1, /#[ \t]*ifdef[ \t]+__cplusplus[ \t]*\r?\n/)),
+      '#ifdef',
+    ),
+    _preproc_linkage_if: _ => alias(
+      token(prec(1, /#[ \t]*if[ \t]+defined[ \t]*(?:\([ \t]*__cplusplus[ \t]*\)|__cplusplus)[ \t]*\r?\n/)),
+      '#if',
+    ),
+    _preproc_linkage_endif: _ => alias(
+      token(prec(1, /#[ \t]*endif[ \t]*\r?\n/)),
+      '#endif',
+    ),
+    _extern_c_string: _ => token(prec(1, /"C"/)),
+
+    _preproc_linkage_start: $ => prec(1, seq(
+      choice(
+        $._preproc_linkage_ifdef,
+        $._preproc_linkage_if,
+      ),
+      'extern',
+      $._extern_c_string,
+      '{',
+      token.immediate(/[ \t]*\r?\n/),
+      $._preproc_linkage_endif,
+    )),
+
+    _preproc_linkage_end: $ => prec(1, seq(
+      choice($._preproc_linkage_ifdef, $._preproc_linkage_if),
+      '}',
+      token.immediate(/[ \t]*\r?\n/),
+      $._preproc_linkage_endif,
+    )),
 
     _block_item: ($, original) => choice(
       ...original.members.filter((member) => member.content?.name != '_old_style_function_definition'),
