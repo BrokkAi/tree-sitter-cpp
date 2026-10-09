@@ -1,6 +1,6 @@
 {
   "name": "tree-sitter-cpp",
-  "version": "0.23.5",
+  "version": "0.23.6",
   "description": "Brokk-maintained C++ grammar for tree-sitter",
   "repository": "https://github.com/BrokkAi/tree-sitter-cpp",
   "license": "MIT",

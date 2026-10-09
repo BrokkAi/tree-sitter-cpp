@@ -30,14 +30,14 @@ grammar changes use a newer ABI and are not silently mixed into this line.
 Add the Brokk-maintained Rust crate to your project:
 
 ```sh
-cargo add brokk-tree-sitter-cpp@=0.23.5
+cargo add brokk-tree-sitter-cpp@=0.23.6
 ```
 
 Or add it directly to `Cargo.toml`:
 
 ```toml
 [dependencies]
-tree-sitter-cpp = { package = "brokk-tree-sitter-cpp", version = "=0.23.5" }
+tree-sitter-cpp = { package = "brokk-tree-sitter-cpp", version = "=0.23.6" }
 ```
 
 The crate prefixes its native parser symbols so it can coexist with the
