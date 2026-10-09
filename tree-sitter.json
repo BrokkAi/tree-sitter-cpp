@@ -23,7 +23,7 @@
     }
   ],
   "metadata": {
-    "version": "0.24.0",
+    "version": "0.24.1",
     "license": "MIT",
     "description": "Brokk-maintained C++ grammar for tree-sitter",
     "authors": [

@@ -127,10 +127,23 @@
           "name": "private_module_fragment_declaration"
         },
         {
+          "type": "PREC",
+          "value": -1,
+          "content": {
+            "type": "ALIAS",
+            "content": {
+              "type": "SYMBOL",
+              "name": "constructor_or_destructor_definition"
+            },
+            "named": true,
+            "value": "function_definition"
+          }
+        },
+        {
           "type": "ALIAS",
           "content": {
             "type": "SYMBOL",
-            "name": "constructor_or_destructor_definition"
+            "name": "qualified_constructor_or_destructor_definition"
           },
           "named": true,
           "value": "function_definition"
@@ -4587,6 +4600,10 @@
                     {
                       "type": "STRING",
                       "value": "*"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "preproc_array_size"
                     }
                   ]
                 },
@@ -12147,6 +12164,101 @@
         ]
       }
     },
+    "preproc_array_size": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_preproc_ifdef_in_array_declarator"
+          },
+          "named": true,
+          "value": "preproc_ifdef"
+        },
+        {
+          "type": "FIELD",
+          "name": "tail",
+          "content": {
+            "type": "SYMBOL",
+            "name": "expression"
+          }
+        }
+      ]
+    },
+    "_preproc_ifdef_in_array_declarator": {
+      "type": "PREC",
+      "value": 1,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "PATTERN",
+                  "value": "#[ \t]*ifdef"
+                },
+                "named": false,
+                "value": "#ifdef"
+              },
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "PATTERN",
+                  "value": "#[ \t]*ifndef"
+                },
+                "named": false,
+                "value": "#ifndef"
+              }
+            ]
+          },
+          {
+            "type": "FIELD",
+            "name": "name",
+            "content": {
+              "type": "SYMBOL",
+              "name": "identifier"
+            }
+          },
+          {
+            "type": "REPEAT1",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_preproc_array_size_item"
+            }
+          },
+          {
+            "type": "ALIAS",
+            "content": {
+              "type": "PATTERN",
+              "value": "#[ \t]*endif"
+            },
+            "named": false,
+            "value": "#endif"
+          }
+        ]
+      }
+    },
+    "_preproc_array_size_item": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "number_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "identifier"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_fold_operator"
+        }
+      ]
+    },
     "virtual_specifier": {
       "type": "CHOICE",
       "members": [
@@ -13631,6 +13743,107 @@
           ]
         }
       ]
+    },
+    "_qualified_function_declarator": {
+      "type": "PREC_DYNAMIC",
+      "value": 2,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "FIELD",
+            "name": "declarator",
+            "content": {
+              "type": "SYMBOL",
+              "name": "qualified_identifier"
+            }
+          },
+          {
+            "type": "SYMBOL",
+            "name": "_function_declarator_seq"
+          }
+        ]
+      }
+    },
+    "qualified_constructor_or_destructor_definition": {
+      "type": "PREC",
+      "value": 1,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "REPEAT",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_constructor_specifiers"
+            }
+          },
+          {
+            "type": "FIELD",
+            "name": "declarator",
+            "content": {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_qualified_function_declarator"
+              },
+              "named": true,
+              "value": "function_declarator"
+            }
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "SYMBOL",
+                        "name": "field_initializer_list"
+                      },
+                      {
+                        "type": "BLANK"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "FIELD",
+                    "name": "body",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "compound_statement"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "constructor_try_statement"
+                },
+                "named": true,
+                "value": "try_statement"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "default_method_clause"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "delete_method_clause"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "pure_virtual_clause"
+              }
+            ]
+          }
+        ]
+      }
     },
     "constructor_or_destructor_declaration": {
       "type": "SEQ",
@@ -18486,6 +18699,15 @@
     ],
     [
       "expression",
+      "_declarator"
+    ],
+    [
+      "_qualified_function_declarator",
+      "_declarator",
+      "expression"
+    ],
+    [
+      "_qualified_function_declarator",
       "_declarator"
     ],
     [
