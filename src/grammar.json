@@ -290,6 +290,15 @@
           "type": "ALIAS",
           "content": {
             "type": "SYMBOL",
+            "name": "qualified_constructor_or_destructor_definition"
+          },
+          "named": true,
+          "value": "function_definition"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
             "name": "operator_cast_definition"
           },
           "named": true,

@@ -88,6 +88,37 @@ mod tests {
                         .child_by_field_name("declarator").unwrap().kind(),
                     "qualified_identifier"
                 );
+                for source in [
+                    "namespace demo { struct Widget { Widget(); }; Widget::Widget() = default; }",
+                    "namespace outer { namespace demo { struct Widget { Widget() noexcept; }; Widget::Widget() noexcept = default; } }",
+                ] {
+                    let tree = parser.parse(source, None).unwrap();
+                    let root = tree.root_node();
+                    assert!(!root.has_error(), "{}", root.to_sexp());
+                    let mut pending = vec![root];
+                    let mut constructors = 0;
+                    while let Some(node) = pending.pop() {
+                        if node.kind() == "function_definition"
+                            && node.child_by_field_name("declarator").and_then(|declarator| declarator.child_by_field_name("declarator")).is_some_and(|name| name.kind() == "qualified_identifier")
+                        {
+                            constructors += 1;
+                        }
+                        pending.extend(node.named_children(&mut node.walk()));
+                    }
+                    assert_eq!(constructors, 1, "{}", root.to_sexp());
+                }
+                for source in ["ordinary() = default;", "namespace demo { ordinary() = default; }"] {
+                    let tree = parser.parse(source, None).unwrap();
+                    let root = tree.root_node();
+                    let mut pending = vec![root];
+                    let mut expressions = 0;
+                    while let Some(node) = pending.pop() {
+                        assert_ne!(node.kind(), "function_definition", "{}", root.to_sexp());
+                        expressions += usize::from(node.kind() == "expression_statement");
+                        pending.extend(node.named_children(&mut node.walk()));
+                    }
+                    assert_eq!(expressions, 1);
+                }
                 let tree = parser.parse("ordinary() = default;", None).unwrap();
                 assert_eq!(tree.root_node().named_child(0).unwrap().kind(), "expression_statement");
                 for source in [

@@ -206,6 +206,7 @@ module.exports = grammar(C, {
       alias($.preproc_if_in_block, $.preproc_if),
       alias($.preproc_ifdef_in_block, $.preproc_ifdef),
       alias($.constructor_or_destructor_definition, $.function_definition),
+      alias($.qualified_constructor_or_destructor_definition, $.function_definition),
       alias($.operator_cast_definition, $.function_definition),
       alias($.operator_cast_declaration, $.declaration),
     ),
