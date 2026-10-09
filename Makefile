@@ -4,7 +4,7 @@ endif
 
 LANGUAGE_NAME := tree-sitter-cpp
 HOMEPAGE_URL := https://github.com/BrokkAi/tree-sitter-cpp
-VERSION := 0.23.6
+VERSION := 0.24.0
 
 # repository
 SRC_DIR := src

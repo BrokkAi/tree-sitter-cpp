@@ -19,32 +19,36 @@ The npm and Python bindings retain their upstream-compatible package names but
 are not published by this fork. The Go, Swift, and C bindings are available
 from source in this repository.
 
-The 0.23.x line is intentionally based on upstream commit
-`f41e1a044c8a84ea9fa8577fdd2eab92ec96de02` (upstream 0.23.4). It preserves
-parser ABI 14, the upstream C 0.23.1 dependency, and Tree-sitter CLI 0.24.3,
-while carrying Brokk's fix for quoted Windows include paths. Later upstream
-grammar changes use a newer ABI and are not silently mixed into this line.
+The 0.24.x line tracks upstream commit
+`c009222808634c1014f82438d4883753516a2c24` and uses parser ABI 15. Loading
+this grammar requires Tree-sitter 0.25 or newer. It adds upstream's module,
+reflection, lambda, explicit object parameter, and operator-call changes
+while retaining Brokk's quoted Windows include-path and split conditional
+`extern "C"` guard fixes.
+
+Generation uses the pinned C grammar 0.24.1 and Tree-sitter CLI 0.26.3.
+The 0.23.x line remains based on upstream 0.23.4 with parser ABI 14.
 
 ## Installation
 
 Add the Brokk-maintained Rust crate to your project:
 
 ```sh
-cargo add brokk-tree-sitter-cpp@=0.23.6
+cargo add brokk-tree-sitter-cpp@=0.24.0
 ```
 
 Or add it directly to `Cargo.toml`:
 
 ```toml
 [dependencies]
-tree-sitter-cpp = { package = "brokk-tree-sitter-cpp", version = "=0.23.6" }
+tree-sitter-cpp = { package = "brokk-tree-sitter-cpp", version = "=0.24.0" }
 ```
 
 The crate prefixes its native parser symbols so it can coexist with the
 upstream `tree-sitter-cpp` crate in one executable.
 
 To regenerate the parser, install the locked JavaScript dependencies (`npm
-ci`) and run `npx tree-sitter generate --abi 14`. Run `npx tree-sitter test` to
+ci`) and run `npx tree-sitter generate --abi 15`. Run `npx tree-sitter test` to
 check the full corpus and highlighting suite.
 
 ## References

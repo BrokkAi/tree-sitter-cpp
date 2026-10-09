@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "tree-sitter-cpp"
 description = "Brokk-maintained C++ grammar for tree-sitter"
-version = "0.23.6"
+version = "0.24.0"
 keywords = ["incremental", "parsing", "tree-sitter", "cpp"]
 classifiers = [
   "Intended Audience :: Developers",
@@ -28,7 +28,7 @@ Repository = "https://github.com/BrokkAi/tree-sitter-cpp"
 Issues = "https://github.com/BrokkAi/tree-sitter-cpp/issues"
 
 [project.optional-dependencies]
-core = ["tree-sitter~=0.22"]
+core = ["tree-sitter~=0.25"]
 
 [tool.cibuildwheel]
 build = "cp39-*"
