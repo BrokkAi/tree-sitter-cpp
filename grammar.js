@@ -84,6 +84,8 @@ module.exports = grammar(C, {
     [$.qualified_type_identifier, $.qualified_identifier],
     [$.comma_expression, $.initializer_list],
     [$.expression, $._declarator],
+    [$._qualified_function_declarator, $._declarator, $.expression],
+    [$._qualified_function_declarator, $._declarator],
     [$.expression, $.structured_binding_declarator],
     [$.expression, $._declarator, $.type_specifier],
     [$.expression, $.identifier_parameter_pack_expansion],
@@ -150,7 +152,8 @@ module.exports = grammar(C, {
       $.import_declaration,
       $.global_module_fragment_declaration,
       $.private_module_fragment_declaration,
-      alias($.constructor_or_destructor_definition, $.function_definition),
+      prec(-1, alias($.constructor_or_destructor_definition, $.function_definition)),
+      alias($.qualified_constructor_or_destructor_definition, $.function_definition),
       alias($.operator_cast_definition, $.function_definition),
       alias($.operator_cast_declaration, $.declaration),
     ),
@@ -203,6 +206,7 @@ module.exports = grammar(C, {
       alias($.preproc_if_in_block, $.preproc_if),
       alias($.preproc_ifdef_in_block, $.preproc_ifdef),
       alias($.constructor_or_destructor_definition, $.function_definition),
+      alias($.qualified_constructor_or_destructor_definition, $.function_definition),
       alias($.operator_cast_definition, $.function_definition),
       alias($.operator_cast_declaration, $.declaration),
     ),
@@ -325,6 +329,36 @@ module.exports = grammar(C, {
           e :
           field('body', choice(e.content, $.try_statement))),
     }),
+
+    array_declarator: $ => prec(1, seq(
+      field('declarator', $._declarator),
+      '[',
+      repeat(choice($.type_qualifier, 'static')),
+      field('size', optional(choice(
+        $.expression,
+        '*',
+        $.preproc_array_size,
+      ))),
+      ']',
+    )),
+
+    preproc_array_size: $ => seq(
+      alias($._preproc_ifdef_in_array_declarator, $.preproc_ifdef),
+      field('tail', $.expression),
+    ),
+
+    _preproc_ifdef_in_array_declarator: $ => prec(1, seq(
+      choice(preprocessor('ifdef'), preprocessor('ifndef')),
+      field('name', $.identifier),
+      repeat1($._preproc_array_size_item),
+      preprocessor('endif'),
+    )),
+
+    _preproc_array_size_item: $ => choice(
+      $.number_literal,
+      $.identifier,
+      $._fold_operator,
+    ),
 
     declaration: $ => seq(
       $._declaration_specifiers,
@@ -689,6 +723,26 @@ module.exports = grammar(C, {
         $.pure_virtual_clause,
       ),
     ),
+
+    _qualified_function_declarator: $ => prec.dynamic(2, seq(
+      field('declarator', $.qualified_identifier),
+      $._function_declarator_seq,
+    )),
+
+    qualified_constructor_or_destructor_definition: $ => prec(1, seq(
+      repeat($._constructor_specifiers),
+      field('declarator', alias($._qualified_function_declarator, $.function_declarator)),
+      choice(
+        seq(
+          optional($.field_initializer_list),
+          field('body', $.compound_statement),
+        ),
+        alias($.constructor_try_statement, $.try_statement),
+        $.default_method_clause,
+        $.delete_method_clause,
+        $.pure_virtual_clause,
+      ),
+    )),
 
     constructor_or_destructor_declaration: $ => seq(
       repeat($._constructor_specifiers),

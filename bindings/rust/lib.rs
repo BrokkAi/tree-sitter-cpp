@@ -47,6 +47,93 @@ pub const TAGS_QUERY: &str = include_str!("../../queries/tags.scm");
 
 #[cfg(test)]
 mod tests {
+    macro_rules! runtime_regressions {
+        ($test:ident, $runtime:ident) => {
+            #[test]
+            fn $test() {
+                let mut parser = $runtime::Parser::new();
+                parser.set_language(&super::LANGUAGE.into()).unwrap();
+                for directive in ["ifdef", "ifndef"] {
+                    let source = format!(
+                        "extern char buffer[\n#{directive} FEATURE\n16 +\n#endif\n1];\nvoid target(void);\n"
+                    );
+                    let tree = parser.parse(&source, None).unwrap();
+                    let root = tree.root_node();
+                    assert!(!root.has_error(), "{}", root.to_sexp());
+                    assert_eq!(root.named_child_count(), 2);
+                    let array = root.named_child(0).unwrap().child_by_field_name("declarator").unwrap();
+                    let size = array.child_by_field_name("size").unwrap();
+                    assert_eq!(size.kind(), "preproc_array_size");
+                    assert_eq!(
+                        size.utf8_text(source.as_bytes()).unwrap(),
+                        format!("#{directive} FEATURE\n16 +\n#endif\n1")
+                    );
+                    let target = root.named_child(1).unwrap();
+                    assert_eq!(target.kind(), "declaration");
+                    assert_eq!(
+                        target.child_by_field_name("declarator").unwrap()
+                            .child_by_field_name("declarator").unwrap()
+                            .utf8_text(source.as_bytes()).unwrap(),
+                        "target"
+                    );
+                }
+                let source = "namespace views { struct Widget { Widget() noexcept; }; }\nviews::Widget::Widget() noexcept = default;\n";
+                let tree = parser.parse(source, None).unwrap();
+                let root = tree.root_node();
+                assert!(!root.has_error(), "{}", root.to_sexp());
+                let constructor = root.named_child(1).unwrap();
+                assert_eq!(constructor.kind(), "function_definition");
+                assert_eq!(
+                    constructor.child_by_field_name("declarator").unwrap()
+                        .child_by_field_name("declarator").unwrap().kind(),
+                    "qualified_identifier"
+                );
+                for source in [
+                    "namespace demo { struct Widget { Widget(); }; Widget::Widget() = default; }",
+                    "namespace outer { namespace demo { struct Widget { Widget() noexcept; }; Widget::Widget() noexcept = default; } }",
+                ] {
+                    let tree = parser.parse(source, None).unwrap();
+                    let root = tree.root_node();
+                    assert!(!root.has_error(), "{}", root.to_sexp());
+                    let mut pending = vec![root];
+                    let mut constructors = 0;
+                    while let Some(node) = pending.pop() {
+                        if node.kind() == "function_definition"
+                            && node.child_by_field_name("declarator").and_then(|declarator| declarator.child_by_field_name("declarator")).is_some_and(|name| name.kind() == "qualified_identifier")
+                        {
+                            constructors += 1;
+                        }
+                        pending.extend(node.named_children(&mut node.walk()));
+                    }
+                    assert_eq!(constructors, 1, "{}", root.to_sexp());
+                }
+                for source in ["ordinary() = default;", "namespace demo { ordinary() = default; }"] {
+                    let tree = parser.parse(source, None).unwrap();
+                    let root = tree.root_node();
+                    let mut pending = vec![root];
+                    let mut expressions = 0;
+                    while let Some(node) = pending.pop() {
+                        assert_ne!(node.kind(), "function_definition", "{}", root.to_sexp());
+                        expressions += usize::from(node.kind() == "expression_statement");
+                        pending.extend(node.named_children(&mut node.walk()));
+                    }
+                    assert_eq!(expressions, 1);
+                }
+                let tree = parser.parse("ordinary() = default;", None).unwrap();
+                assert_eq!(tree.root_node().named_child(0).unwrap().kind(), "expression_statement");
+                for source in [
+                    "#include \"C:\\include\\helper.h\"\n",
+                    "#ifdef __cplusplus\nextern \"C\" {\n#endif\nvoid f(void);\n#ifdef __cplusplus\n}\n#endif\nint after(void);\n",
+                ] {
+                    let tree = parser.parse(source, None).unwrap();
+                    assert!(!tree.root_node().has_error(), "{}", tree.root_node().to_sexp());
+                }
+            }
+        };
+    }
+
+    runtime_regressions!(regressions_on_selected_runtime, tree_sitter);
+
     fn parse_cpp(source: &str) -> tree_sitter::Tree {
         let mut parser = tree_sitter::Parser::new();
         parser
