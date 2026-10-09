@@ -17,6 +17,8 @@ _obj/
 dist/
 *.egg-info
 *.whl
+__pycache__/
+*.py[cod]
 
 # C artifacts
 *.a
