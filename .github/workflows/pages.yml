@@ -34,6 +34,7 @@ jobs:
       - name: Install locked JavaScript dependencies
         run: |
           npm ci --legacy-peer-deps --ignore-scripts
+          npm rebuild tree-sitter-cli
       - name: Export playground with Pages-capable CLI
         run: |
           npx --yes --package=tree-sitter-cli@0.26.3 tree-sitter build --wasm
