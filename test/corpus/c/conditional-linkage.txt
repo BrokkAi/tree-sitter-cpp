@@ -1,0 +1,234 @@
+==================
+Conditional extern-C linkage guard with ifdef
+==================
+#ifdef __cplusplus
+extern "C" {
+#endif
+void f(void);
+#ifdef __cplusplus
+}
+#endif
+int after(void);
+
+------------------
+
+(translation_unit
+  (preproc_linkage_open
+    (identifier)
+    (string_literal
+      (string_content)))
+  (declaration
+    (primitive_type)
+    (function_declarator
+      (identifier)
+      (parameter_list
+        (parameter_declaration
+          (primitive_type)))))
+  (preproc_linkage_close
+    (identifier))
+  (declaration
+    (primitive_type)
+    (function_declarator
+      (identifier)
+      (parameter_list
+        (parameter_declaration
+          (primitive_type))))))
+
+==================
+Conditional extern-C linkage guard with if-defined
+==================
+#if defined (__cplusplus)
+extern "C" {
+#endif
+void f(void);
+#if defined (__cplusplus)
+}
+#endif
+int after(void);
+
+------------------
+
+(translation_unit
+  (preproc_linkage_open
+    (preproc_defined
+      (identifier))
+    (string_literal
+      (string_content)))
+  (declaration
+    (primitive_type)
+    (function_declarator
+      (identifier)
+      (parameter_list
+        (parameter_declaration
+          (primitive_type)))))
+  (preproc_linkage_close
+    (preproc_defined
+      (identifier)))
+  (declaration
+    (primitive_type)
+    (function_declarator
+      (identifier)
+      (parameter_list
+        (parameter_declaration
+          (primitive_type))))))
+
+==================
+Conditional linkage guards accept arbitrary names and string literals
+==================
+#if defined(BINDINGS)
+extern "C++" {
+#endif
+void bind(void);
+#if defined(BINDINGS)
+}
+#endif
+
+------------------
+
+(translation_unit
+  (preproc_linkage_open
+    (preproc_defined
+      (identifier))
+    (string_literal
+      (string_content)))
+  (declaration
+    (primitive_type)
+    (function_declarator
+      (identifier)
+      (parameter_list
+        (parameter_declaration
+          (primitive_type)))))
+  (preproc_linkage_close
+    (preproc_defined
+      (identifier))))
+
+==================
+An ordinary ifdef around an include remains a conditional node
+==================
+#ifdef __cplusplus
+#include <cstddef>
+#endif
+void after(void);
+
+------------------
+
+(translation_unit
+  (preproc_ifdef
+    (identifier)
+    (preproc_include
+      (system_lib_string)))
+  (declaration
+    (primitive_type)
+    (function_declarator
+      (identifier)
+      (parameter_list
+        (parameter_declaration
+          (primitive_type))))))
+
+==================
+An ordinary conditional with else branches remains a conditional node
+==================
+#ifdef __cplusplus
+#include <cstddef>
+#else
+#include <stddef.h>
+#endif
+void after(void);
+
+------------------
+
+(translation_unit
+  (preproc_ifdef
+    (identifier)
+    (preproc_include
+      (system_lib_string))
+    (preproc_else
+      (preproc_include
+        (system_lib_string))))
+  (declaration
+    (primitive_type)
+    (function_declarator
+      (identifier)
+      (parameter_list
+        (parameter_declaration
+          (primitive_type))))))
+
+==================
+Nested ifdef blocks remain nested conditional nodes
+==================
+#ifdef OUTER
+#ifdef __cplusplus
+#include <cstddef>
+#endif
+#endif
+void after(void);
+
+------------------
+
+(translation_unit
+  (preproc_ifdef
+    (identifier)
+    (preproc_ifdef
+      (identifier)
+      (preproc_include
+        (system_lib_string))))
+  (declaration
+    (primitive_type)
+    (function_declarator
+      (identifier)
+      (parameter_list
+        (parameter_declaration
+          (primitive_type))))))
+
+==================
+A closing guard without an opening linkage guard is not a fragment pair
+==================
+#ifdef FEATURE
+}
+#endif
+int after(void);
+
+------------------
+
+(translation_unit
+  (preproc_ifdef
+    (identifier)
+    (ERROR))
+  (declaration
+    (primitive_type)
+    (function_declarator
+      (identifier)
+      (parameter_list
+        (parameter_declaration
+          (primitive_type))))))
+
+==================
+Conditional linkage fragments inside a namespace stay in block grammar
+==================
+namespace n {
+#ifdef FEATURE
+extern "C" {
+void f(void);
+}
+#endif
+}
+
+------------------
+
+(translation_unit
+  (namespace_definition
+    (namespace_identifier)
+    (declaration_list
+      (preproc_ifdef
+        (identifier)
+        (linkage_specification
+          (string_literal
+            (string_content))
+          (declaration_list
+            (declaration
+              (primitive_type)
+              (function_declarator
+                (identifier)
+                (parameter_list
+                  (parameter_declaration
+                    (primitive_type)))))))))))

@@ -124,6 +124,7 @@ module.exports = grammar(C, {
     ),
     _top_level_item: ($, original) => choice(
       ...original.members.filter((member) => member.content?.name != '_old_style_function_definition'),
+      $._preproc_linkage_block,
       $.namespace_definition,
       $.concept_definition,
       $.namespace_alias_definition,
@@ -136,6 +137,35 @@ module.exports = grammar(C, {
       alias($.operator_cast_definition, $.function_definition),
       alias($.operator_cast_declaration, $.declaration),
     ),
+
+    _preproc_linkage_block: $ => seq(
+      $.preproc_linkage_open,
+      repeat($._top_level_item),
+      $.preproc_linkage_close,
+    ),
+
+    // These fragments use the same preprocessor tokens as ordinary
+    // conditionals. Parsing through #endif lets the parser distinguish a
+    // linkage guard from a conditional whose body contains other directives.
+    preproc_linkage_open: $ => prec(1, seq(
+      choice(
+        seq(preprocessor('ifdef'), field('name', $.identifier)),
+        seq(preprocessor('if'), field('condition', $._preproc_expression), '\n'),
+      ),
+      'extern',
+      field('value', $.string_literal),
+      '{',
+      preprocessor('endif'),
+    )),
+
+    preproc_linkage_close: $ => prec(1, seq(
+      choice(
+        seq(preprocessor('ifdef'), field('name', $.identifier)),
+        seq(preprocessor('if'), field('condition', $._preproc_expression), '\n'),
+      ),
+      '}',
+      preprocessor('endif'),
+    )),
 
     _block_item: ($, original) => choice(
       ...original.members.filter((member) => member.content?.name != '_old_style_function_definition'),
@@ -1449,4 +1479,15 @@ function commaSep(rule) {
  */
 function commaSep1(rule) {
   return seq(rule, repeat(seq(',', rule)));
+}
+
+/**
+ * Creates a preprocessor directive token.
+ *
+ * @param {string} command
+ *
+ * @returns {AliasRule}
+ */
+function preprocessor(command) {
+  return alias(new RegExp('#[ \t]*' + command), '#' + command);
 }
