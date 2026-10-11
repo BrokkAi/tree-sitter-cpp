@@ -26,6 +26,13 @@ reflection, lambda, explicit object parameter, and operator-call changes
 while retaining Brokk's quoted Windows include-path and split conditional
 `extern "C"` guard fixes.
 
+Version 0.24.2 retains declarations following array bounds built from an
+`#ifdef` or `#ifndef` prefix and an unconditional tail expression. The
+`preproc_array_size` node owns that complete bound. General `#if`, `#else`,
+and nested directives inside array bounds remain unsupported. This version
+also recognizes qualified defaulted constructors, including namespace-qualified
+owners and exception specifications, both at file scope and inside namespaces.
+
 Generation uses the pinned C grammar 0.24.1 and Tree-sitter CLI 0.26.3.
 The 0.23.x line remains based on upstream 0.23.4 with parser ABI 14.
 
@@ -34,14 +41,14 @@ The 0.23.x line remains based on upstream 0.23.4 with parser ABI 14.
 Add the Brokk-maintained Rust crate to your project:
 
 ```sh
-cargo add brokk-tree-sitter-cpp@=0.24.0
+cargo add brokk-tree-sitter-cpp@=0.24.2
 ```
 
 Or add it directly to `Cargo.toml`:
 
 ```toml
 [dependencies]
-tree-sitter-cpp = { package = "brokk-tree-sitter-cpp", version = "=0.24.0" }
+tree-sitter-cpp = { package = "brokk-tree-sitter-cpp", version = "=0.24.2" }
 ```
 
 The crate prefixes its native parser symbols so it can coexist with the

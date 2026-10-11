@@ -1,0 +1,230 @@
+==================
+Guarded array bound with ifdef retains the following declaration
+==================
+extern char option_buffer[
+#ifdef FEATURE_X
+16 +
+#endif
+1];
+void target(void);
+
+------------------
+
+(translation_unit
+  (declaration
+    (storage_class_specifier)
+    (primitive_type)
+    (array_declarator
+      (identifier)
+      (preproc_array_size
+        (preproc_ifdef
+          (identifier)
+          (number_literal))
+        (number_literal))))
+  (declaration
+    (primitive_type)
+    (function_declarator
+      (identifier)
+      (parameter_list
+        (parameter_declaration
+          (primitive_type))))))
+
+==================
+Guarded array bound with ifndef retains the following declaration
+==================
+extern char option_buffer[
+#ifndef FEATURE_X
+16 +
+#endif
+1];
+void target(void);
+
+------------------
+
+(translation_unit
+  (declaration
+    (storage_class_specifier)
+    (primitive_type)
+    (array_declarator
+      (identifier)
+      (preproc_array_size
+        (preproc_ifdef
+          (identifier)
+          (number_literal))
+        (number_literal))))
+  (declaration
+    (primitive_type)
+    (function_declarator
+      (identifier)
+      (parameter_list
+        (parameter_declaration
+          (primitive_type))))))
+
+==================
+Ordinary array bounds remain normal expressions
+==================
+extern char ordinary_buffer[1];
+void target(void);
+
+------------------
+
+(translation_unit
+  (declaration
+    (storage_class_specifier)
+    (primitive_type)
+    (array_declarator
+      (identifier)
+      (number_literal)))
+  (declaration
+    (primitive_type)
+    (function_declarator
+      (identifier)
+      (parameter_list
+        (parameter_declaration
+          (primitive_type))))))
+
+==================
+Malformed guarded array reports a missing bracket and retains the following declaration
+==================
+extern char missing_buffer[
+#ifdef FEATURE_X
+16 +
+#endif
+1;
+void after(void);
+
+------------------
+
+(translation_unit
+  (declaration
+    (storage_class_specifier)
+    (primitive_type)
+    (array_declarator
+      (identifier)
+      (preproc_array_size
+        (preproc_ifdef
+          (identifier)
+          (number_literal))
+        (number_literal))
+      (MISSING "]")))
+  (declaration
+    (primitive_type)
+    (function_declarator
+      (identifier)
+      (parameter_list
+        (parameter_declaration
+          (primitive_type))))))
+
+==================
+Qualified defaulted constructors preserve declaration shape
+==================
+namespace views {
+  struct Widget { Widget() noexcept; };
+}
+struct InlineWidget {
+  InlineWidget() {}
+};
+views::Widget::Widget() noexcept = default;
+ordinary() = default;
+
+------------------
+
+(translation_unit
+  (namespace_definition
+    (namespace_identifier)
+    (declaration_list
+      (struct_specifier
+        (type_identifier)
+        (field_declaration_list
+          (declaration
+            (function_declarator
+              (identifier)
+              (parameter_list)
+              (noexcept)))))))
+  (struct_specifier
+    (type_identifier)
+    (field_declaration_list
+      (function_definition
+        (function_declarator
+          (identifier)
+          (parameter_list))
+        (compound_statement))))
+  (function_definition
+    (function_declarator
+      (qualified_identifier
+        (namespace_identifier)
+        (qualified_identifier
+          (namespace_identifier)
+          (identifier)))
+      (parameter_list)
+      (noexcept))
+    (default_method_clause))
+  (expression_statement
+    (assignment_expression
+      (call_expression
+        (identifier)
+        (argument_list))
+      (identifier))))
+
+==================
+Qualified defaulted constructors in nested namespace declaration lists
+==================
+namespace outer {
+  namespace inner {
+    struct Widget { Widget() noexcept; };
+    Widget::Widget() noexcept = default;
+    ordinary() = default;
+  }
+  ordinary() = default;
+  void f() { ordinary() = default; }
+}
+
+------------------
+
+(translation_unit
+  (namespace_definition
+    (namespace_identifier)
+    (declaration_list
+      (namespace_definition
+        (namespace_identifier)
+        (declaration_list
+          (struct_specifier
+            (type_identifier)
+            (field_declaration_list
+              (declaration
+                (function_declarator
+                  (identifier)
+                  (parameter_list)
+                  (noexcept)))))
+          (function_definition
+            (function_declarator
+              (qualified_identifier
+                (namespace_identifier)
+                (identifier))
+              (parameter_list)
+              (noexcept))
+            (default_method_clause))
+          (expression_statement
+            (assignment_expression
+              (call_expression
+                (identifier)
+                (argument_list))
+              (identifier)))))
+      (expression_statement
+        (assignment_expression
+          (call_expression
+            (identifier)
+            (argument_list))
+          (identifier)))
+      (function_definition
+        (primitive_type)
+        (function_declarator
+          (identifier)
+          (parameter_list))
+        (compound_statement
+          (expression_statement
+            (assignment_expression
+              (call_expression
+                (identifier)
+                (argument_list))
+              (identifier))))))))

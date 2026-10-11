@@ -808,6 +808,10 @@
           {
             "type": "expression",
             "named": true
+          },
+          {
+            "type": "preproc_array_size",
+            "named": true
           }
         ]
       }
@@ -5194,6 +5198,32 @@
     }
   },
   {
+    "type": "preproc_array_size",
+    "named": true,
+    "fields": {
+      "tail": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "preproc_ifdef",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "preproc_call",
     "named": true,
     "fields": {
@@ -6077,6 +6107,10 @@
           "named": true
         },
         {
+          "type": "identifier",
+          "named": true
+        },
+        {
           "type": "import_declaration",
           "named": true
         },
@@ -6094,6 +6128,10 @@
         },
         {
           "type": "namespace_definition",
+          "named": true
+        },
+        {
+          "type": "number_literal",
           "named": true
         },
         {

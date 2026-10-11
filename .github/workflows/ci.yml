@@ -89,6 +89,11 @@ jobs:
         run: |
           cargo test --locked
           cargo test --locked --all-features
+      - name: Run Rust tests on minimum supported runtime
+        run: |
+          cargo update -p tree-sitter --precise 0.25.10
+          cargo test --locked
+          cargo test --locked --all-features
       - name: Check Rust formatting
         run: cargo fmt --check
       - name: Check whitespace
