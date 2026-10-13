@@ -161,7 +161,11 @@ module.exports = grammar(C, {
     _preproc_linkage_block: $ => seq(
       $.preproc_linkage_open,
       repeat($._top_level_item),
-      $.preproc_linkage_close,
+      choice(
+        $.preproc_linkage_close,
+        alias($._preproc_linkage_close_ifdef, $.preproc_ifdef),
+        alias($._preproc_linkage_close_if, $.preproc_if),
+      ),
     ),
 
     // These fragments use the same preprocessor tokens as ordinary
@@ -184,6 +188,37 @@ module.exports = grammar(C, {
         seq(preprocessor('if'), field('condition', $._preproc_expression), '\n'),
       ),
       '}',
+      preprocessor('endif'),
+    )),
+
+    // A closing guard may also contain C++ declarations. Keep those declarations
+    // under an ordinary conditional node so consumers retain their guard.
+    _preproc_linkage_close_ifdef: $ => prec(1, seq(
+      choice(preprocessor('ifdef'), preprocessor('ifndef')),
+      field('name', $.identifier),
+      '}',
+      choice(
+        seq(
+          repeat1($._top_level_item),
+          optional(field('alternative', choice($.preproc_else, $.preproc_elif, $.preproc_elifdef))),
+        ),
+        field('alternative', choice($.preproc_else, $.preproc_elif, $.preproc_elifdef)),
+      ),
+      preprocessor('endif'),
+    )),
+
+    _preproc_linkage_close_if: $ => prec(1, seq(
+      preprocessor('if'),
+      field('condition', $._preproc_expression),
+      '\n',
+      '}',
+      choice(
+        seq(
+          repeat1($._top_level_item),
+          optional(field('alternative', choice($.preproc_else, $.preproc_elif, $.preproc_elifdef))),
+        ),
+        field('alternative', choice($.preproc_else, $.preproc_elif, $.preproc_elifdef)),
+      ),
       preprocessor('endif'),
     )),
 

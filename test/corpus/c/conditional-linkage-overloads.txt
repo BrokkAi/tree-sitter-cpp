@@ -1,0 +1,165 @@
+==================
+libuv conditional C and C++ overloads with ifdef
+==================
+
+#ifndef UV_H
+#define UV_H
+#ifdef __cplusplus
+extern "C" {
+#endif
+typedef enum { MODE_NORMAL } mode_t;
+int uv_tty_set_mode(void*, mode_t);
+#ifdef __cplusplus
+}
+extern "C++" {
+inline int uv_tty_set_mode(void* handle, int mode) {
+  return uv_tty_set_mode(handle, static_cast<mode_t>(mode));
+}
+}
+#endif
+#endif
+
+------------------
+
+(translation_unit
+  (preproc_ifdef
+    (identifier)
+    (preproc_def
+      (identifier))
+    (preproc_linkage_open
+      (identifier)
+      (string_literal
+        (string_content)))
+    (type_definition
+      (enum_specifier
+        (enumerator_list
+          (enumerator
+            (identifier))))
+      (type_identifier))
+    (declaration
+      (primitive_type)
+      (function_declarator
+        (identifier)
+        (parameter_list
+          (parameter_declaration
+            (primitive_type)
+            (abstract_pointer_declarator))
+          (parameter_declaration
+            (type_identifier)))))
+    (preproc_ifdef
+      (identifier)
+      (linkage_specification
+        (string_literal
+          (string_content))
+        (declaration_list
+          (function_definition
+            (storage_class_specifier)
+            (primitive_type)
+            (function_declarator
+              (identifier)
+              (parameter_list
+                (parameter_declaration
+                  (primitive_type)
+                  (pointer_declarator
+                    (identifier)))
+                (parameter_declaration
+                  (primitive_type)
+                  (identifier))))
+            (compound_statement
+              (return_statement
+                (call_expression
+                  (identifier)
+                  (argument_list
+                    (identifier)
+                    (call_expression
+                      (template_function
+                        (identifier)
+                        (template_argument_list
+                          (type_descriptor
+                            (type_identifier))))
+                      (argument_list
+                        (identifier)))))))))))))
+
+==================
+libuv conditional C and C++ overloads with if-defined
+==================
+
+#ifndef UV_H
+#define UV_H
+#if defined (__cplusplus)
+extern "C" {
+#endif
+typedef enum { MODE_NORMAL } mode_t;
+int uv_tty_set_mode(void*, mode_t);
+#if defined (__cplusplus)
+}
+extern "C++" {
+inline int uv_tty_set_mode(void* handle, int mode) {
+  return uv_tty_set_mode(handle, static_cast<mode_t>(mode));
+}
+}
+#endif
+#endif
+
+------------------
+
+(translation_unit
+  (preproc_ifdef
+    (identifier)
+    (preproc_def
+      (identifier))
+    (preproc_linkage_open
+      (preproc_defined
+        (identifier))
+      (string_literal
+        (string_content)))
+    (type_definition
+      (enum_specifier
+        (enumerator_list
+          (enumerator
+            (identifier))))
+      (type_identifier))
+    (declaration
+      (primitive_type)
+      (function_declarator
+        (identifier)
+        (parameter_list
+          (parameter_declaration
+            (primitive_type)
+            (abstract_pointer_declarator))
+          (parameter_declaration
+            (type_identifier)))))
+    (preproc_if
+      (preproc_defined
+        (identifier))
+      (linkage_specification
+        (string_literal
+          (string_content))
+        (declaration_list
+          (function_definition
+            (storage_class_specifier)
+            (primitive_type)
+            (function_declarator
+              (identifier)
+              (parameter_list
+                (parameter_declaration
+                  (primitive_type)
+                  (pointer_declarator
+                    (identifier)))
+                (parameter_declaration
+                  (primitive_type)
+                  (identifier))))
+            (compound_statement
+              (return_statement
+                (call_expression
+                  (identifier)
+                  (argument_list
+                    (identifier)
+                    (call_expression
+                      (template_function
+                        (identifier)
+                        (template_argument_list
+                          (type_descriptor
+                            (type_identifier))))
+                      (argument_list
+                        (identifier)))))))))))))
