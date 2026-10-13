@@ -181,6 +181,138 @@ mod tests {
                 .sum::<usize>()
     }
 
+    fn find_declaration_containing<'tree>(
+        node: tree_sitter::Node<'tree>,
+        source: &str,
+        text: &str,
+    ) -> Option<tree_sitter::Node<'tree>> {
+        let mut pending = vec![node];
+        while let Some(current) = pending.pop() {
+            if matches!(current.kind(), "declaration" | "function_definition")
+                && current
+                    .utf8_text(source.as_bytes())
+                    .is_ok_and(|node_text| node_text.contains(text))
+            {
+                return Some(current);
+            }
+            let mut cursor = current.walk();
+            pending.extend(current.named_children(&mut cursor));
+        }
+        None
+    }
+
+    fn find_preprocessor_node<'tree>(
+        node: tree_sitter::Node<'tree>,
+        source: &str,
+        kind: &str,
+        first_line_prefix: &str,
+    ) -> Option<tree_sitter::Node<'tree>> {
+        let mut pending = vec![node];
+        while let Some(current) = pending.pop() {
+            if current.kind() == kind
+                && current
+                    .utf8_text(source.as_bytes())
+                    .is_ok_and(|text| text.starts_with(first_line_prefix))
+            {
+                return Some(current);
+            }
+            let mut cursor = current.walk();
+            pending.extend(current.named_children(&mut cursor));
+        }
+        None
+    }
+
+    fn enclosing_preprocessor_directives(node: tree_sitter::Node<'_>, source: &str) -> Vec<String> {
+        let mut directives = Vec::new();
+        let mut ancestor = node.parent();
+        while let Some(current) = ancestor {
+            if matches!(current.kind(), "preproc_if" | "preproc_ifdef") {
+                let first_line = current
+                    .utf8_text(source.as_bytes())
+                    .unwrap()
+                    .lines()
+                    .next()
+                    .unwrap_or_default()
+                    .trim();
+                directives.push(first_line.to_owned());
+            }
+            ancestor = current.parent();
+        }
+        directives
+    }
+
+    fn assert_guard_ancestry(
+        node: tree_sitter::Node<'_>,
+        source: &str,
+        required: &[&str],
+        forbidden: &[&str],
+    ) -> Vec<String> {
+        let directives = enclosing_preprocessor_directives(node, source);
+        for guard in required {
+            assert!(
+                directives.iter().any(|directive| directive.contains(guard)),
+                "expected guard {guard} in {directives:?}"
+            );
+        }
+        for guard in forbidden {
+            assert!(
+                directives
+                    .iter()
+                    .all(|directive| !directive.contains(guard)),
+                "did not expect guard {guard} in {directives:?}"
+            );
+        }
+        directives
+    }
+
+    fn has_ancestor_kind(node: tree_sitter::Node<'_>, kind: &str) -> bool {
+        let mut ancestor = node.parent();
+        while let Some(current) = ancestor {
+            if current.kind() == kind {
+                return true;
+            }
+            ancestor = current.parent();
+        }
+        false
+    }
+
+    fn add_declaration_before_final_endif(source: &str) -> String {
+        let header_endif = "#endif\n";
+        let body = source
+            .strip_suffix(header_endif)
+            .expect("UV fixture should end with its header guard");
+        format!("{body}int uv_after(void);\n{header_endif}")
+    }
+
+    fn assert_uv_header_linkage_scopes(source: &str, cpp_guard: &str) {
+        let tree = parse_cpp(source);
+        let root = tree.root_node();
+        let c_declaration =
+            find_declaration_containing(root, source, "int uv_tty_set_mode(void*, mode_t);")
+                .expect("C API declaration should be retained");
+        assert_guard_ancestry(c_declaration, source, &["UV_H"], &[cpp_guard]);
+
+        let cpp_definition = find_declaration_containing(
+            root,
+            source,
+            "inline int uv_tty_set_mode(void* handle, int mode)",
+        )
+        .expect("C++ overload should be retained");
+        assert_guard_ancestry(cpp_definition, source, &["UV_H", cpp_guard], &[]);
+
+        let following = find_declaration_containing(root, source, "int uv_after(void);")
+            .expect("declaration following the C++ conditional should be retained");
+        assert_guard_ancestry(following, source, &["UV_H"], &[cpp_guard]);
+
+        let header_guard = find_preprocessor_node(root, source, "preproc_ifdef", "#ifndef UV_H")
+            .expect("UV_H header guard should remain a conditional node");
+        assert!(header_guard
+            .utf8_text(source.as_bytes())
+            .unwrap()
+            .trim_end()
+            .ends_with("#endif"));
+    }
+
     #[test]
     fn test_can_load_grammar() {
         let mut parser = tree_sitter::Parser::new();
@@ -263,6 +395,120 @@ int after(void);
         );
         assert_eq!(count_named_nodes(root, "declaration"), 2);
         assert_eq!(count_named_nodes(root, "function_declarator"), 2);
+    }
+
+    #[test]
+    fn test_uv_conditional_cpp_overload_stays_inside_its_guard() {
+        const UV_HEADER: &str = r#"
+#ifndef UV_H
+#define UV_H
+#ifdef __cplusplus
+extern "C" {
+#endif
+typedef enum { MODE_NORMAL } mode_t;
+int uv_tty_set_mode(void*, mode_t);
+#ifdef __cplusplus
+}
+extern "C++" {
+inline int uv_tty_set_mode(void* handle, int mode) {
+  return uv_tty_set_mode(handle, static_cast<mode_t>(mode));
+}
+}
+#endif
+#endif
+"#;
+
+        let ifdef = add_declaration_before_final_endif(UV_HEADER);
+        assert_uv_header_linkage_scopes(&ifdef, "__cplusplus");
+
+        let if_defined = ifdef.replace("#ifdef __cplusplus", "#if defined (__cplusplus)");
+        assert_uv_header_linkage_scopes(&if_defined, "__cplusplus");
+
+        let arbitrary_guard = ifdef.replace("__cplusplus", "UV_CPP_ABI");
+        assert_uv_header_linkage_scopes(&arbitrary_guard, "UV_CPP_ABI");
+
+        let nested_guard = ifdef
+            .replacen(
+                "#ifdef __cplusplus\n}\nextern \"C++\" {",
+                "#ifdef __cplusplus\n}\n#if defined(UV_CPP_ABI)\nextern \"C++\" {",
+                1,
+            )
+            .replacen(
+                "}\n#endif\nint uv_after(void);",
+                "}\n#endif\n#endif\nint uv_after(void);",
+                1,
+            );
+        assert_ne!(
+            nested_guard, ifdef,
+            "nested guard fixture should be changed"
+        );
+        assert_uv_header_linkage_scopes(&nested_guard, "__cplusplus");
+        let nested_tree = parse_cpp(&nested_guard);
+        let cpp_definition = find_declaration_containing(
+            nested_tree.root_node(),
+            &nested_guard,
+            "inline int uv_tty_set_mode(void* handle, int mode)",
+        )
+        .unwrap();
+        assert!(
+            enclosing_preprocessor_directives(cpp_definition, &nested_guard)
+                .iter()
+                .any(|directive| directive.contains("UV_CPP_ABI")),
+            "nested ABI guard should remain an ancestor of the C++ overload: {}",
+            nested_tree.root_node().to_sexp()
+        );
+        let following = find_declaration_containing(
+            nested_tree.root_node(),
+            &nested_guard,
+            "int uv_after(void);",
+        )
+        .unwrap();
+        assert_guard_ancestry(
+            following,
+            &nested_guard,
+            &["UV_H"],
+            &["__cplusplus", "UV_CPP_ABI"],
+        );
+
+        for (branch_directive, expected_kind) in [
+            ("#else", "preproc_else"),
+            ("#elif defined(UV_CPP_ABI)", "preproc_elif"),
+        ] {
+            let branch_source = ifdef.replace(
+                "}\n#endif\nint uv_after(void);",
+                &format!(
+                    "}}\n{branch_directive}\nint uv_alternate(void);\n#endif\nint uv_after(void);"
+                ),
+            );
+            assert_uv_header_linkage_scopes(&branch_source, "__cplusplus");
+            let branch_tree = parse_cpp(&branch_source);
+            let alternate = find_declaration_containing(
+                branch_tree.root_node(),
+                &branch_source,
+                "int uv_alternate(void);",
+            )
+            .expect("alternate declaration should be retained");
+            assert!(
+                has_ancestor_kind(alternate, expected_kind),
+                "alternate declaration should remain inside {expected_kind}: {}",
+                branch_tree.root_node().to_sexp()
+            );
+        }
+    }
+
+    #[test]
+    fn test_conditional_linkage_empty_true_branch_preserves_else() {
+        let source = "#ifdef __cplusplus\nextern \"C\" {\n#endif\nvoid c_api(void);\n#ifdef __cplusplus\n}\n#else\nint alternate(void);\n#endif\nint after(void);\n";
+        let tree = parse_cpp(source);
+        let root = tree.root_node();
+        let c_api = find_declaration_containing(root, source, "void c_api(void);").unwrap();
+        assert_guard_ancestry(c_api, source, &[], &["__cplusplus"]);
+
+        let alternate = find_declaration_containing(root, source, "int alternate(void);").unwrap();
+        assert!(has_ancestor_kind(alternate, "preproc_else"));
+
+        let after = find_declaration_containing(root, source, "int after(void);").unwrap();
+        assert_guard_ancestry(after, source, &[], &["__cplusplus"]);
     }
 
     #[test]
