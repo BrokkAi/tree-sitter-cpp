@@ -50,6 +50,10 @@
         "named": true
       },
       {
+        "type": "macro_modifier_declarator",
+        "named": true
+      },
+      {
         "type": "operator_name",
         "named": true
       },
@@ -100,6 +104,10 @@
         "named": true
       },
       {
+        "type": "macro_modifier_declarator",
+        "named": true
+      },
+      {
         "type": "operator_name",
         "named": true
       },
@@ -135,6 +143,10 @@
       },
       {
         "type": "function_declarator",
+        "named": true
+      },
+      {
+        "type": "macro_modifier_declarator",
         "named": true
       },
       {
@@ -441,6 +453,10 @@
       },
       {
         "type": "enum_specifier",
+        "named": true
+      },
+      {
+        "type": "macro_type_specifier",
         "named": true
       },
       {
@@ -2207,6 +2223,10 @@
           "named": true
         },
         {
+          "type": "macro_modifier",
+          "named": true
+        },
+        {
           "type": "ms_declspec_modifier",
           "named": true
         },
@@ -2657,6 +2677,10 @@
           "named": true
         },
         {
+          "type": "macro_modifier",
+          "named": true
+        },
+        {
           "type": "ms_declspec_modifier",
           "named": true
         },
@@ -2899,6 +2923,10 @@
         },
         {
           "type": "bitfield_clause",
+          "named": true
+        },
+        {
+          "type": "macro_modifier",
           "named": true
         },
         {
@@ -3384,6 +3412,10 @@
           "named": true
         },
         {
+          "type": "macro_modifier",
+          "named": true
+        },
+        {
           "type": "ms_declspec_modifier",
           "named": true
         },
@@ -3648,6 +3680,10 @@
         },
         {
           "type": "field_initializer_list",
+          "named": true
+        },
+        {
+          "type": "macro_modifier",
           "named": true
         },
         {
@@ -4390,6 +4426,81 @@
     }
   },
   {
+    "type": "macro_modifier",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "macro_modifier_declarator",
+    "named": true,
+    "fields": {
+      "declarator": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "_declarator",
+            "named": true
+          },
+          {
+            "type": "_field_declarator",
+            "named": true
+          },
+          {
+            "type": "_type_declarator",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "macro_modifier",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "macro_type_specifier",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "type": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "type_descriptor",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "module_declaration",
     "named": true,
     "fields": {
@@ -4775,6 +4886,10 @@
           "named": true
         },
         {
+          "type": "macro_modifier",
+          "named": true
+        },
+        {
           "type": "ms_declspec_modifier",
           "named": true
         },
@@ -4853,6 +4968,10 @@
         },
         {
           "type": "attribute_specifier",
+          "named": true
+        },
+        {
+          "type": "macro_modifier",
           "named": true
         },
         {
@@ -4935,6 +5054,10 @@
         },
         {
           "type": "attribute_specifier",
+          "named": true
+        },
+        {
+          "type": "macro_modifier",
           "named": true
         },
         {
@@ -7258,6 +7381,10 @@
           "named": true
         },
         {
+          "type": "macro_modifier",
+          "named": true
+        },
+        {
           "type": "ms_declspec_modifier",
           "named": true
         },
@@ -8073,6 +8200,10 @@
         },
         {
           "type": "attribute_specifier",
+          "named": true
+        },
+        {
+          "type": "macro_modifier",
           "named": true
         },
         {
