@@ -66,6 +66,24 @@ module.exports = grammar(C, {
     // C
     [$.type_specifier, $._declarator],
     [$.type_specifier, $.expression],
+    [$.type_specifier, $.expression, $.macro_type_specifier],
+    [$.type_specifier, $.macro_type_specifier],
+    [$.type_specifier, $.macro_modifier],
+    [$._declarator, $.type_specifier, $.macro_modifier],
+    [$._declarator, $.type_specifier, $.expression, $.macro_type_specifier, $.macro_modifier],
+    [$.type_specifier, $.expression, $.macro_modifier],
+    [$._declarator, $.type_specifier, $.expression, $.macro_modifier],
+    [$._declaration_specifiers, $.macro_modifier_declarator],
+    [$._declarator, $.expression, $.macro_modifier],
+    [$.expression, $.macro_modifier],
+    [$._declarator, $.macro_modifier],
+    [$._field_declarator, $.macro_modifier],
+    [$._type_declarator, $.macro_modifier],
+    [$._declarator, $.type_specifier, $.macro_type_specifier, $.macro_modifier],
+    [$.type_specifier, $._top_level_expression_statement],
+    [$.type_specifier, $.template_type],
+    [$.type_specifier, $.optional_type_parameter_declaration],
+    [$.sized_type_specifier, $.macro_modifier],
     [$.sized_type_specifier],
     [$.attributed_statement],
     [$._declaration_modifiers, $.attributed_statement],
@@ -286,10 +304,11 @@ module.exports = grammar(C, {
       $.splice_type_specifier,
       $.placeholder_type_specifier,
       $.decltype,
-      prec.right(choice(
+      choice(
+        $.macro_type_specifier,
         alias($.qualified_type_identifier, $.qualified_identifier),
         $._type_identifier,
-      )),
+      ),
     ),
 
     type_qualifier: (_, original) => choice(
@@ -419,6 +438,25 @@ module.exports = grammar(C, {
       original,
       'virtual',
     ),
+
+    // Identical to C's `_declaration_specifiers`, except that object-like
+    // macro identifiers (`macro_modifier`) are admitted in the leading
+    // modifier repeat only, e.g. `ffc_internal` in
+    // `ffc_internal ffc_inline uint64_t f(void)`. They must not enter the
+    // trailing repeat: `_declaration_specifiers` is `prec.right`, so a
+    // trailing identifier-modifier would be shifted over the declarator and
+    // break every ordinary declaration.
+    _declaration_specifiers: $ => prec.right(seq(
+      repeat(choice($._declaration_modifiers, $.macro_modifier)),
+      field('type', $.type_specifier),
+      repeat($._declaration_modifiers),
+    )),
+
+    // An object-like macro identifier used as a declaration modifier, e.g.
+    // `ffc_internal` in `ffc_internal ffc_inline uint64_t f(void)`. Admitted
+    // only at dynamic precedence -1 so it can only appear in a parse that
+    // would otherwise contain an error.
+    macro_modifier: $ => prec.dynamic(-1, $.identifier),
 
     explicit_function_specifier: $ => choice(
       'explicit',
@@ -744,7 +782,11 @@ module.exports = grammar(C, {
       repeat1($.catch_clause),
     ),
 
-    constructor_or_destructor_definition: $ => seq(
+    // Dynamic precedence -2: an unqualified `name() = default;` at namespace
+    // or block scope is an expression statement (assignment), not a
+    // constructor definition. The constructor interpretation must only win
+    // when no other parse survives.
+    constructor_or_destructor_definition: $ => prec.dynamic(-2, seq(
       repeat($._constructor_specifiers),
       field('declarator', $.function_declarator),
       choice(
@@ -757,7 +799,7 @@ module.exports = grammar(C, {
         $.delete_method_clause,
         $.pure_virtual_clause,
       ),
-    ),
+    )),
 
     _qualified_function_declarator: $ => prec.dynamic(2, seq(
       field('declarator', $.qualified_identifier),
@@ -820,11 +862,13 @@ module.exports = grammar(C, {
       $.operator_name,
       $.destructor_name,
       $.structured_binding_declarator,
+      $.macro_modifier_declarator,
     ),
 
     _field_declarator: ($, original) => choice(
       original,
       alias($.reference_field_declarator, $.reference_declarator),
+      alias($.macro_modifier_field_declarator, $.macro_modifier_declarator),
       $.template_method,
       $.operator_name,
     ),
@@ -832,7 +876,27 @@ module.exports = grammar(C, {
     _type_declarator: ($, original) => choice(
       original,
       alias($.reference_type_declarator, $.reference_declarator),
+      alias($.macro_modifier_type_declarator, $.macro_modifier_declarator),
     ),
+
+    // A declarator prefixed by object-like macro identifiers, e.g.
+    // `CJSON_CDECL *malloc_fn` in `void *(CJSON_CDECL *malloc_fn)(size_t)`.
+    // Admitted only at dynamic precedence -1 so it can only appear in a
+    // parse that would otherwise contain an error.
+    macro_modifier_declarator: $ => prec.dynamic(-1, prec.right(seq(
+      $.macro_modifier,
+      field('declarator', $._declarator),
+    ))),
+
+    macro_modifier_field_declarator: $ => prec.dynamic(-1, prec.right(seq(
+      $.macro_modifier,
+      field('declarator', $._field_declarator),
+    ))),
+
+    macro_modifier_type_declarator: $ => prec.dynamic(-1, prec.right(seq(
+      $.macro_modifier,
+      field('declarator', $._type_declarator),
+    ))),
 
     _abstract_declarator: ($, original) => choice(
       original,

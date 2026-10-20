@@ -1,0 +1,355 @@
+================================================================================
+Function-like macro wrapping the return type (CJSON_PUBLIC)
+================================================================================
+
+CJSON_PUBLIC(const char *) cJSON_GetStringValue(const cJSON * const item) {
+  return 0;
+}
+
+CJSON_PUBLIC(double) cJSON_GetNumberValue(const cJSON * const item);
+
+CJSON_PUBLIC(cJSON_bool) cJSON_IsInvalid(const cJSON * const item);
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (function_definition
+    type: (macro_type_specifier
+      name: (identifier)
+      type: (type_descriptor
+        (type_qualifier)
+        type: (primitive_type)
+        declarator: (abstract_pointer_declarator)))
+    declarator: (function_declarator
+      declarator: (identifier)
+      parameters: (parameter_list
+        (parameter_declaration
+          (type_qualifier)
+          type: (type_identifier)
+          declarator: (pointer_declarator
+            (type_qualifier)
+            declarator: (identifier)))))
+    body: (compound_statement
+      (return_statement
+        (number_literal))))
+  (declaration
+    type: (macro_type_specifier
+      name: (identifier)
+      type: (type_descriptor
+        type: (primitive_type)))
+    declarator: (function_declarator
+      declarator: (identifier)
+      parameters: (parameter_list
+        (parameter_declaration
+          (type_qualifier)
+          type: (type_identifier)
+          declarator: (pointer_declarator
+            (type_qualifier)
+            declarator: (identifier))))))
+  (declaration
+    type: (macro_type_specifier
+      name: (identifier)
+      type: (type_descriptor
+        type: (type_identifier)))
+    declarator: (function_declarator
+      declarator: (identifier)
+      parameters: (parameter_list
+        (parameter_declaration
+          (type_qualifier)
+          type: (type_identifier)
+          declarator: (pointer_declarator
+            (type_qualifier)
+            declarator: (identifier)))))))
+
+================================================================================
+Token-expanded control for CJSON_PUBLIC
+================================================================================
+
+const char * cJSON_GetStringValue(const cJSON * const item) {
+  return 0;
+}
+
+double cJSON_GetNumberValue(const cJSON * const item);
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (function_definition
+    (type_qualifier)
+    type: (primitive_type)
+    declarator: (pointer_declarator
+      declarator: (function_declarator
+        declarator: (identifier)
+        parameters: (parameter_list
+          (parameter_declaration
+            (type_qualifier)
+            type: (type_identifier)
+            declarator: (pointer_declarator
+              (type_qualifier)
+              declarator: (identifier))))))
+    body: (compound_statement
+      (return_statement
+        (number_literal))))
+  (declaration
+    type: (primitive_type)
+    declarator: (function_declarator
+      declarator: (identifier)
+      parameters: (parameter_list
+        (parameter_declaration
+          (type_qualifier)
+          type: (type_identifier)
+          declarator: (pointer_declarator
+            (type_qualifier)
+            declarator: (identifier)))))))
+
+================================================================================
+Object-like macro inside a parenthesized declarator (CJSON_CDECL)
+================================================================================
+
+typedef struct cJSON_Hooks {
+  void *(CJSON_CDECL *malloc_fn)(size_t sz);
+  void (CJSON_CDECL *free_fn)(void *ptr);
+} cJSON_Hooks;
+
+typedef void *(CJSON_CDECL *hook_fn)(size_t sz);
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (type_definition
+    type: (struct_specifier
+      name: (type_identifier)
+      body: (field_declaration_list
+        (field_declaration
+          type: (primitive_type)
+          declarator: (pointer_declarator
+            declarator: (function_declarator
+              declarator: (parenthesized_declarator
+                (macro_modifier_declarator
+                  (macro_modifier
+                    (identifier))
+                  declarator: (pointer_declarator
+                    declarator: (field_identifier))))
+              parameters: (parameter_list
+                (parameter_declaration
+                  type: (primitive_type)
+                  declarator: (identifier))))))
+        (field_declaration
+          type: (primitive_type)
+          declarator: (function_declarator
+            declarator: (parenthesized_declarator
+              (macro_modifier_declarator
+                (macro_modifier
+                  (identifier))
+                declarator: (pointer_declarator
+                  declarator: (field_identifier))))
+            parameters: (parameter_list
+              (parameter_declaration
+                type: (primitive_type)
+                declarator: (pointer_declarator
+                  declarator: (identifier))))))))
+    declarator: (type_identifier))
+  (type_definition
+    type: (primitive_type)
+    declarator: (pointer_declarator
+      declarator: (function_declarator
+        declarator: (parenthesized_declarator
+          (macro_modifier_declarator
+            (macro_modifier
+              (identifier))
+            declarator: (pointer_declarator
+              declarator: (type_identifier))))
+        parameters: (parameter_list
+          (parameter_declaration
+            type: (primitive_type)
+            declarator: (identifier)))))))
+
+================================================================================
+Object-like macro before a function-definition declarator
+================================================================================
+
+static unsigned char* CJSON_CDECL cJSON_strdup(const unsigned char* string) {
+  return 0;
+}
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (function_definition
+    (storage_class_specifier)
+    type: (sized_type_specifier
+      type: (primitive_type))
+    declarator: (pointer_declarator
+      declarator: (macro_modifier_declarator
+        (macro_modifier
+          (identifier))
+        declarator: (function_declarator
+          declarator: (identifier)
+          parameters: (parameter_list
+            (parameter_declaration
+              (type_qualifier)
+              type: (sized_type_specifier
+                type: (primitive_type))
+              declarator: (pointer_declarator
+                declarator: (identifier)))))))
+    body: (compound_statement
+      (return_statement
+        (number_literal)))))
+
+================================================================================
+Object-like macro prefixes in declaration specifiers (ffc_internal/ffc_inline)
+================================================================================
+
+ffc_internal ffc_inline uint64_t ffc_ntohll(uint64_t v) {
+  return v;
+}
+
+ffc_internal int ffc_connect(void);
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (function_definition
+    (macro_modifier
+      (identifier))
+    (macro_modifier
+      (identifier))
+    type: (primitive_type)
+    declarator: (function_declarator
+      declarator: (identifier)
+      parameters: (parameter_list
+        (parameter_declaration
+          type: (primitive_type)
+          declarator: (identifier))))
+    body: (compound_statement
+      (return_statement
+        (identifier))))
+  (declaration
+    (macro_modifier
+      (identifier))
+    type: (primitive_type)
+    declarator: (function_declarator
+      declarator: (identifier)
+      parameters: (parameter_list
+        (parameter_declaration
+          type: (primitive_type))))))
+
+================================================================================
+Token-expanded control for object-like macro prefixes
+================================================================================
+
+uint64_t ffc_ntohll(uint64_t v) {
+  return v;
+}
+
+int ffc_connect(void);
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (function_definition
+    type: (primitive_type)
+    declarator: (function_declarator
+      declarator: (identifier)
+      parameters: (parameter_list
+        (parameter_declaration
+          type: (primitive_type)
+          declarator: (identifier))))
+    body: (compound_statement
+      (return_statement
+        (identifier))))
+  (declaration
+    type: (primitive_type)
+    declarator: (function_declarator
+      declarator: (identifier)
+      parameters: (parameter_list
+        (parameter_declaration
+          type: (primitive_type))))))
+
+================================================================================
+Malformed: unbalanced macro parens still do not parse cleanly
+================================================================================
+
+CJSON_PUBLIC(const char * cJSON_GetStringValue(const cJSON * const item) {
+  return 0;
+}
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (function_definition
+    declarator: (function_declarator
+      declarator: (identifier)
+      parameters: (parameter_list
+        (parameter_declaration
+          (type_qualifier)
+          type: (primitive_type)
+          declarator: (pointer_declarator
+            declarator: (function_declarator
+              declarator: (identifier)
+              parameters: (parameter_list
+                (parameter_declaration
+                  (type_qualifier)
+                  type: (type_identifier)
+                  declarator: (pointer_declarator
+                    (type_qualifier)
+                    declarator: (identifier)))))))
+        (MISSING ")")))
+    body: (compound_statement
+      (return_statement
+        (number_literal)))))
+
+================================================================================
+Malformed: unknown statement garbage still produces an error
+================================================================================
+
+void f(void) {
+  %%not a statement%%;
+}
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (function_definition
+    type: (primitive_type)
+    declarator: (function_declarator
+      declarator: (identifier)
+      parameters: (parameter_list
+        (parameter_declaration
+          type: (primitive_type))))
+    body: (compound_statement
+      (ERROR)
+      (expression_statement
+        (unary_expression
+          (ERROR
+            (identifier))
+          argument: (identifier))
+        (ERROR)))))
+
+================================================================================
+Malformed: body syntax errors still produce errors
+================================================================================
+
+int g(void) {
+  int x = ;
+  return x
+}
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (function_definition
+    type: (primitive_type)
+    declarator: (function_declarator
+      declarator: (identifier)
+      parameters: (parameter_list
+        (parameter_declaration
+          type: (primitive_type))))
+    body: (compound_statement
+      (declaration
+        type: (primitive_type)
+        declarator: (identifier)
+        (ERROR))
+      (return_statement
+        (identifier)
+        (MISSING ";")))))
