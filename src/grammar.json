@@ -8679,8 +8679,17 @@
           {
             "type": "REPEAT",
             "content": {
-              "type": "SYMBOL",
-              "name": "type_qualifier"
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "type_qualifier"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "macro_modifier"
+                }
+              ]
             }
           },
           {
@@ -8694,8 +8703,17 @@
           {
             "type": "REPEAT",
             "content": {
-              "type": "SYMBOL",
-              "name": "type_qualifier"
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "type_qualifier"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "macro_modifier"
+                }
+              ]
             }
           },
           {
@@ -19026,6 +19044,10 @@
     [
       "type_specifier",
       "macro_modifier"
+    ],
+    [
+      "type_descriptor",
+      "macro_modifier_declarator"
     ],
     [
       "_declarator",

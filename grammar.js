@@ -69,6 +69,7 @@ module.exports = grammar(C, {
     [$.type_specifier, $.expression, $.macro_type_specifier],
     [$.type_specifier, $.macro_type_specifier],
     [$.type_specifier, $.macro_modifier],
+    [$.type_descriptor, $.macro_modifier_declarator],
     [$._declarator, $.type_specifier, $.macro_modifier],
     [$._declarator, $.type_specifier, $.expression, $.macro_type_specifier, $.macro_modifier],
     [$.type_specifier, $.expression, $.macro_modifier],
@@ -318,7 +319,16 @@ module.exports = grammar(C, {
       'consteval',
     ),
 
-    type_descriptor: (_, original) => prec.right(original),
+    // Identical to C's `type_descriptor`, except that object-like macro
+    // identifiers (`macro_modifier`, dynamic precedence -1) are admitted in
+    // the qualifier repeats, e.g. `(UNITY_PTR_ATTRIBUTE const UNITY_INT8 *)x`.
+    // They can only appear in a parse that would otherwise contain an error.
+    type_descriptor: $ => prec.right(seq(
+      repeat(choice($.type_qualifier, $.macro_modifier)),
+      field('type', $.type_specifier),
+      repeat(choice($.type_qualifier, $.macro_modifier)),
+      field('declarator', optional($._abstract_declarator)),
+    )),
 
     attribute: ($, original) => seq(
       optional(seq('using', field('namespace', $.identifier), ':')),
