@@ -353,6 +353,7 @@ int g(void) {
       (return_statement
         (identifier)
         (MISSING ";")))))
+
 ================================================================================
 Macro modifier inside a cast type descriptor
 ================================================================================
@@ -378,10 +379,10 @@ int f(void *expected) {
         (pointer_expression
           argument: (cast_expression
             type: (type_descriptor
-              type: (type_identifier)
-              (type_qualifier)
               (macro_modifier
                 (identifier))
+              (type_qualifier)
+              type: (type_identifier)
               declarator: (abstract_pointer_declarator))
             value: (identifier)))))))
 
@@ -410,9 +411,9 @@ int f(void *expected) {
         (pointer_expression
           argument: (cast_expression
             type: (type_descriptor
-              type: (type_identifier)
               (macro_modifier
                 (identifier))
+              type: (type_identifier)
               declarator: (abstract_pointer_declarator))
             value: (identifier)))))))
 
@@ -445,3 +446,173 @@ int f(void *expected) {
               (ERROR)
               right: (identifier))
             (MISSING ")")))))))
+
+================================================================================
+Export macro constructor recovery keeps parameter names
+================================================================================
+
+namespace Botan {
+class BOTAN_PUBLIC_API(2, 0) XMSS_Parameters final {
+   public:
+      BOTAN_DEPRECATED("Deprecated no replacement") XMSS_Parameters() = default;
+      XMSS_Parameters(int oid, int len);
+      size_t len() const;
+
+   private:
+      XMSS_Parameters(int oid, int wots_oid, size_t hash_len, size_t tree_height) :
+            m_oid(oid), m_wots_oid(wots_oid), m_element_size(hash_len), m_tree_height(tree_height) {}
+
+      int m_oid;
+      int m_wots_oid;
+      size_t m_element_size;
+      size_t m_tree_height;
+};
+}
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (namespace_definition
+    (namespace_identifier)
+    (declaration_list
+      (ERROR
+        (class_specifier
+          (type_identifier))
+        (comma_expression
+          (number_literal)
+          (number_literal)))
+      (function_definition
+        (type_identifier)
+        (identifier)
+        (compound_statement
+          (labeled_statement
+            (statement_identifier)
+            (expression_statement
+              (call_expression
+                (identifier)
+                (argument_list
+                  (string_literal
+                    (string_content))))
+              (MISSING ";")))
+          (expression_statement
+            (assignment_expression
+              (call_expression
+                (identifier)
+                (argument_list))
+              (identifier)))
+          (ERROR
+            (function_declarator
+              (identifier)
+              (parameter_list
+                (parameter_declaration
+                  (primitive_type)
+                  (identifier))
+                (parameter_declaration
+                  (primitive_type)
+                  (identifier)))))
+          (expression_statement)
+          (declaration
+            (primitive_type)
+            (function_declarator
+              (identifier)
+              (parameter_list)
+              (type_qualifier)))
+          (labeled_statement
+            (statement_identifier)
+            (declaration
+              (type_identifier)
+              (parenthesized_declarator
+                (macro_modifier_declarator
+                  (macro_modifier
+                    (identifier))
+                  (identifier))
+                (MISSING ")"))
+              (macro_modifier_declarator
+                (macro_modifier
+                  (identifier))
+                (identifier))
+              (macro_modifier_declarator
+                (macro_modifier
+                  (identifier))
+                (identifier))
+              (macro_modifier_declarator
+                (macro_modifier
+                  (identifier))
+                (ERROR
+                  (identifier))
+                (function_declarator
+                  (identifier)
+                  (parameter_list
+                    (parameter_declaration
+                      (type_identifier)))))
+              (function_declarator
+                (identifier)
+                (parameter_list
+                  (parameter_declaration
+                    (type_identifier))))
+              (function_declarator
+                (identifier)
+                (parameter_list
+                  (parameter_declaration
+                    (type_identifier))))
+              (init_declarator
+                (function_declarator
+                  (identifier)
+                  (parameter_list
+                    (parameter_declaration
+                      (type_identifier))))
+                (initializer_list))
+              (MISSING ";")))
+          (declaration
+            (primitive_type)
+            (identifier))
+          (declaration
+            (primitive_type)
+            (identifier))
+          (declaration
+            (primitive_type)
+            (identifier))
+          (declaration
+            (primitive_type)
+            (identifier))))
+      (expression_statement))))
+
+================================================================================
+Trailing parameter names are declarators
+================================================================================
+
+using callback = void (*)(int oid, int len);
+class Parameters {
+  Parameters(int oid, int len);
+};
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (alias_declaration
+    (type_identifier)
+    (type_descriptor
+      (primitive_type)
+      (abstract_function_declarator
+        (abstract_parenthesized_declarator
+          (abstract_pointer_declarator))
+        (parameter_list
+          (parameter_declaration
+            (primitive_type)
+            (identifier))
+          (parameter_declaration
+            (primitive_type)
+            (identifier))))))
+  (class_specifier
+    (type_identifier)
+    (field_declaration_list
+      (declaration
+        (function_declarator
+          (identifier)
+          (parameter_list
+            (parameter_declaration
+              (primitive_type)
+              (identifier))
+            (parameter_declaration
+              (primitive_type)
+              (identifier))))))))

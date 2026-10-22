@@ -8703,17 +8703,8 @@
           {
             "type": "REPEAT",
             "content": {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "type_qualifier"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "macro_modifier"
-                }
-              ]
+              "type": "SYMBOL",
+              "name": "type_qualifier"
             }
           },
           {

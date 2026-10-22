@@ -321,12 +321,13 @@ module.exports = grammar(C, {
 
     // Identical to C's `type_descriptor`, except that object-like macro
     // identifiers (`macro_modifier`, dynamic precedence -1) are admitted in
-    // the qualifier repeats, e.g. `(UNITY_PTR_ATTRIBUTE const UNITY_INT8 *)x`.
-    // They can only appear in a parse that would otherwise contain an error.
+    // the leading qualifier repeat, e.g. `(UNITY_PTR_ATTRIBUTE const UNITY_INT8 *)x`.
+    // These macros only appear in a parse that would otherwise contain an error.
+    // Trailing identifiers must remain available as declarator names during recovery.
     type_descriptor: $ => prec.right(seq(
       repeat(choice($.type_qualifier, $.macro_modifier)),
       field('type', $.type_specifier),
-      repeat(choice($.type_qualifier, $.macro_modifier)),
+      repeat($.type_qualifier),
       field('declarator', optional($._abstract_declarator)),
     )),
 
