@@ -8677,20 +8677,38 @@
         "type": "SEQ",
         "members": [
           {
-            "type": "REPEAT",
-            "content": {
-              "type": "CHOICE",
-              "members": [
-                {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "REPEAT",
+                "content": {
                   "type": "SYMBOL",
                   "name": "type_qualifier"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "macro_modifier"
                 }
-              ]
-            }
+              },
+              {
+                "type": "REPEAT1",
+                "content": {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "REPEAT1",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "macro_modifier"
+                      }
+                    },
+                    {
+                      "type": "REPEAT1",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "type_qualifier"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           },
           {
             "type": "FIELD",
@@ -19037,7 +19055,6 @@
       "macro_modifier"
     ],
     [
-      "type_descriptor",
       "macro_modifier_declarator"
     ],
     [

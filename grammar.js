@@ -69,7 +69,7 @@ module.exports = grammar(C, {
     [$.type_specifier, $.expression, $.macro_type_specifier],
     [$.type_specifier, $.macro_type_specifier],
     [$.type_specifier, $.macro_modifier],
-    [$.type_descriptor, $.macro_modifier_declarator],
+    [$.macro_modifier_declarator],
     [$._declarator, $.type_specifier, $.macro_modifier],
     [$._declarator, $.type_specifier, $.expression, $.macro_type_specifier, $.macro_modifier],
     [$.type_specifier, $.expression, $.macro_modifier],
@@ -319,13 +319,15 @@ module.exports = grammar(C, {
       'consteval',
     ),
 
-    // Identical to C's `type_descriptor`, except that object-like macro
-    // identifiers (`macro_modifier`, dynamic precedence -1) are admitted in
-    // the leading qualifier repeat, e.g. `(UNITY_PTR_ATTRIBUTE const UNITY_INT8 *)x`.
-    // These macros only appear in a parse that would otherwise contain an error.
-    // Trailing identifiers must remain available as declarator names during recovery.
+    // Identical to C's `type_descriptor`, except that leading object-like
+    // macro identifiers are admitted when followed directly by a type qualifier,
+    // e.g. `(UNITY_PTR_ATTRIBUTE const UNITY_INT8 *)x`. Requiring the qualifier
+    // limits macro recovery without consuming ordinary trailing identifiers.
     type_descriptor: $ => prec.right(seq(
-      repeat(choice($.type_qualifier, $.macro_modifier)),
+      choice(
+        repeat($.type_qualifier),
+        repeat1(seq(repeat1($.macro_modifier), repeat1($.type_qualifier))),
+      ),
       field('type', $.type_specifier),
       repeat($.type_qualifier),
       field('declarator', optional($._abstract_declarator)),

@@ -387,7 +387,7 @@ int f(void *expected) {
             value: (identifier)))))))
 
 ================================================================================
-Macro modifier with a pointer in a cast type descriptor
+Macro prefix without a qualifier still recovers
 ================================================================================
 
 int f(void *expected) {
@@ -408,14 +408,14 @@ int f(void *expected) {
             declarator: (identifier)))))
     body: (compound_statement
       (return_statement
-        (pointer_expression
-          argument: (cast_expression
-            type: (type_descriptor
-              (macro_modifier
-                (identifier))
-              type: (type_identifier)
-              declarator: (abstract_pointer_declarator))
-            value: (identifier)))))))
+        (ERROR
+          (macro_modifier
+            (identifier))
+          (macro_modifier
+            (identifier))
+          (ERROR)
+          (macro_modifier
+            (identifier)))))))
 
 ================================================================================
 Genuinely malformed cast still recovers
