@@ -5544,12 +5544,29 @@
                 ]
               },
               {
-                "type": "FIELD",
-                "name": "body",
-                "content": {
-                  "type": "SYMBOL",
-                  "name": "enumerator_list"
-                }
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "SYMBOL",
+                        "name": "_enum_base_clause"
+                      },
+                      {
+                        "type": "BLANK"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "FIELD",
+                    "name": "body",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "enumerator_list"
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -8679,17 +8696,8 @@
           {
             "type": "REPEAT",
             "content": {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "type_qualifier"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "macro_modifier"
-                }
-              ]
+              "type": "SYMBOL",
+              "name": "type_qualifier"
             }
           },
           {
@@ -8703,17 +8711,8 @@
           {
             "type": "REPEAT",
             "content": {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "type_qualifier"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "macro_modifier"
-                }
-              ]
+              "type": "SYMBOL",
+              "name": "type_qualifier"
             }
           },
           {
@@ -19044,10 +19043,6 @@
     [
       "type_specifier",
       "macro_modifier"
-    ],
-    [
-      "type_descriptor",
-      "macro_modifier_declarator"
     ],
     [
       "_declarator",

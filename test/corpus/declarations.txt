@@ -1738,6 +1738,65 @@ class Foo {
               (identifier))))))))
 
 ================================================================================
+Unnamed enums with an underlying type
+================================================================================
+
+enum : int { A, B };
+enum : unsigned char { C };
+enum : Bar { D };
+enum : Bar::Rab { E };
+typedef enum : int { F } G;
+struct S {
+  enum : long { H } h;
+};
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (enum_specifier
+    base: (primitive_type)
+    body: (enumerator_list
+      (enumerator
+        name: (identifier))
+      (enumerator
+        name: (identifier))))
+  (enum_specifier
+    base: (sized_type_specifier
+      type: (primitive_type))
+    body: (enumerator_list
+      (enumerator
+        name: (identifier))))
+  (enum_specifier
+    base: (type_identifier)
+    body: (enumerator_list
+      (enumerator
+        name: (identifier))))
+  (enum_specifier
+    base: (qualified_identifier
+      scope: (namespace_identifier)
+      name: (type_identifier))
+    body: (enumerator_list
+      (enumerator
+        name: (identifier))))
+  (type_definition
+    type: (enum_specifier
+      base: (primitive_type)
+      body: (enumerator_list
+        (enumerator
+          name: (identifier))))
+    declarator: (type_identifier))
+  (struct_specifier
+    name: (type_identifier)
+    body: (field_declaration_list
+      (field_declaration
+        type: (enum_specifier
+          base: (sized_type_specifier)
+          body: (enumerator_list
+            (enumerator
+              name: (identifier))))
+        declarator: (field_identifier)))))
+
+================================================================================
 static_assert declarations
 ================================================================================
 
