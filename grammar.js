@@ -69,7 +69,6 @@ module.exports = grammar(C, {
     [$.type_specifier, $.expression, $.macro_type_specifier],
     [$.type_specifier, $.macro_type_specifier],
     [$.type_specifier, $.macro_modifier],
-    [$.type_descriptor, $.macro_modifier_declarator],
     [$._declarator, $.type_specifier, $.macro_modifier],
     [$._declarator, $.type_specifier, $.expression, $.macro_type_specifier, $.macro_modifier],
     [$.type_specifier, $.expression, $.macro_modifier],
@@ -319,16 +318,7 @@ module.exports = grammar(C, {
       'consteval',
     ),
 
-    // Identical to C's `type_descriptor`, except that object-like macro
-    // identifiers (`macro_modifier`, dynamic precedence -1) are admitted in
-    // the qualifier repeats, e.g. `(UNITY_PTR_ATTRIBUTE const UNITY_INT8 *)x`.
-    // They can only appear in a parse that would otherwise contain an error.
-    type_descriptor: $ => prec.right(seq(
-      repeat(choice($.type_qualifier, $.macro_modifier)),
-      field('type', $.type_specifier),
-      repeat(choice($.type_qualifier, $.macro_modifier)),
-      field('declarator', optional($._abstract_declarator)),
-    )),
+    type_descriptor: (_, original) => prec.right(original),
 
     attribute: ($, original) => seq(
       optional(seq('using', field('namespace', $.identifier), ':')),
@@ -501,7 +491,12 @@ module.exports = grammar(C, {
           optional($._enum_base_clause),
           optional(field('body', $.enumerator_list)),
         ),
-        field('body', $.enumerator_list),
+        // An unnamed enumeration may still fix its underlying type:
+        // `enum : int { A };` ([dcl.enum] enum-head-name is optional).
+        seq(
+          optional($._enum_base_clause),
+          field('body', $.enumerator_list),
+        ),
       ),
       optional($.attribute_specifier),
     )),

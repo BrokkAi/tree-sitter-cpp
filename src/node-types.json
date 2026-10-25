@@ -7873,10 +7873,6 @@
       "required": false,
       "types": [
         {
-          "type": "macro_modifier",
-          "named": true
-        },
-        {
           "type": "type_qualifier",
           "named": true
         }
