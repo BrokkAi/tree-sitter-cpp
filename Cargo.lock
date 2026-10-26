@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "brokk-tree-sitter-cpp"
-version = "0.24.6"
+version = "0.24.7"
 dependencies = [
  "cc",
  "tree-sitter",
