@@ -87,6 +87,7 @@ module.exports = grammar(C, {
     [$.sized_type_specifier, $.macro_modifier],
     [$._class_name, $._macro_name],
     [$._class_head_macro_modifiers],
+    [$._declarator, $.type_specifier, $.macro_type_specifier, $.macro_modifier, $._macro_name],
     [$.sized_type_specifier],
     [$.attributed_statement],
     [$._declaration_modifiers, $.attributed_statement],
@@ -764,6 +765,8 @@ module.exports = grammar(C, {
       alias($.inline_method_definition, $.function_definition),
       alias($.constructor_or_destructor_definition, $.function_definition),
       alias($.constructor_or_destructor_declaration, $.declaration),
+      alias($._decorated_constructor_or_destructor_definition, $.function_definition),
+      alias($._decorated_constructor_or_destructor_declaration, $.declaration),
       alias($.operator_cast_definition, $.function_definition),
       alias($.operator_cast_declaration, $.declaration),
       $.friend_declaration,
@@ -777,6 +780,7 @@ module.exports = grammar(C, {
     ),
 
     field_declaration: $ => seq(
+      optional($._member_leading_macro_modifiers),
       $._declaration_specifiers,
       commaSep(seq(
         field('declarator', $._field_declarator),
@@ -792,6 +796,7 @@ module.exports = grammar(C, {
     ),
 
     inline_method_definition: $ => seq(
+      optional($._member_leading_macro_modifiers),
       $._declaration_specifiers,
       field('declarator', $._field_declarator),
       optional($._declarator_macro_modifiers),
@@ -841,17 +846,58 @@ module.exports = grammar(C, {
     constructor_or_destructor_definition: $ => prec.dynamic(-2, seq(
       repeat($._constructor_specifiers),
       field('declarator', $.function_declarator),
-      choice(
-        seq(
-          optional($.field_initializer_list),
-          field('body', $.compound_statement),
-        ),
-        alias($.constructor_try_statement, $.try_statement),
-        $.default_method_clause,
-        $.delete_method_clause,
-        $.pure_virtual_clause,
-      ),
+      $._constructor_definition_tail,
     )),
+
+    _constructor_definition_tail: $ => choice(
+      seq(
+        optional($.field_initializer_list),
+        field('body', $.compound_statement),
+      ),
+      alias($.constructor_try_statement, $.try_statement),
+      $.default_method_clause,
+      $.delete_method_clause,
+      $.pure_virtual_clause,
+    ),
+
+    // A string-argument attribute macro before a class member, e.g.
+    // `BOTAN_DEPRECATED("use X") XMSS_Parameters() = default;` or
+    // `ATTRIBUTE("use factory") explicit DL_Group(const char* name);`. It is a
+    // `macro_modifier` with an `argument_list` of string literals only.
+    // General arguments made statement-like class-body invocations
+    // (`ABSL_INTERNAL_X(insert, impl, const &, ...);`) recover worse, and a
+    // repeat let error recovery chain them across their semicolons. Admitted
+    // only in class bodies and at dynamic precedence -3, so a member that
+    // already parses keeps its tree.
+    _member_leading_macro_modifiers: $ => prec.dynamic(-3, alias(
+      $._string_attribute_macro_modifier,
+      $.macro_modifier,
+    )),
+
+    _string_attribute_macro_modifier: $ => seq(
+      $._macro_name,
+      alias($._string_argument_list, $.argument_list),
+    ),
+
+    _string_argument_list: $ => seq(
+      '(',
+      commaSep1(choice($.string_literal, $.concatenated_string, $.raw_string_literal)),
+      ')',
+    ),
+
+    _decorated_constructor_or_destructor_definition: $ => prec.dynamic(-2, seq(
+      $._member_leading_macro_modifiers,
+      repeat($._constructor_specifiers),
+      field('declarator', $.function_declarator),
+      $._constructor_definition_tail,
+    )),
+
+    _decorated_constructor_or_destructor_declaration: $ => seq(
+      $._member_leading_macro_modifiers,
+      repeat($._constructor_specifiers),
+      field('declarator', $.function_declarator),
+      ';',
+    ),
 
     _qualified_function_declarator: $ => prec.dynamic(2, seq(
       field('declarator', $.qualified_identifier),

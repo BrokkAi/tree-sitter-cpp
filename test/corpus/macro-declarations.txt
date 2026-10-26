@@ -1064,3 +1064,153 @@ struct Calls {
           (macro_modifier
             (identifier))
           declarator: (field_identifier))))))
+
+================================================================================
+String attribute macros before class members
+================================================================================
+
+namespace Botan {
+class BOTAN_PUBLIC_API(2, 0) XMSS_Parameters final {
+   public:
+      BOTAN_DEPRECATED("Deprecated no replacement") XMSS_Parameters() = default;
+      XMSS_Parameters(int oid, int len);
+      BOTAN_DEPRECATED("Use len()") size_t length() const;
+      DEPRECATED("old" "name") int legacy() { return 0; }
+};
+class BOTAN_PUBLIC_API(2, 0) DL_Group final {
+   public:
+      ATTRIBUTE("use factory") explicit DL_Group(const char* name);
+      DL_Group(int value);
+};
+}
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (namespace_definition
+    name: (namespace_identifier)
+    body: (declaration_list
+      (class_specifier
+        (macro_modifier
+          (identifier)
+          (argument_list
+            (number_literal)
+            (number_literal)))
+        name: (type_identifier)
+        (virtual_specifier)
+        body: (field_declaration_list
+          (access_specifier)
+          (function_definition
+            (macro_modifier
+              (identifier)
+              (argument_list
+                (string_literal
+                  (string_content))))
+            declarator: (function_declarator
+              declarator: (identifier)
+              parameters: (parameter_list))
+            (default_method_clause))
+          (declaration
+            declarator: (function_declarator
+              declarator: (identifier)
+              parameters: (parameter_list
+                (parameter_declaration
+                  type: (primitive_type)
+                  declarator: (identifier))
+                (parameter_declaration
+                  type: (primitive_type)
+                  declarator: (identifier)))))
+          (field_declaration
+            (macro_modifier
+              (identifier)
+              (argument_list
+                (string_literal
+                  (string_content))))
+            type: (primitive_type)
+            declarator: (function_declarator
+              declarator: (field_identifier)
+              parameters: (parameter_list)
+              (type_qualifier)))
+          (function_definition
+            (macro_modifier
+              (identifier)
+              (argument_list
+                (concatenated_string
+                  (string_literal
+                    (string_content))
+                  (string_literal
+                    (string_content)))))
+            type: (primitive_type)
+            declarator: (function_declarator
+              declarator: (field_identifier)
+              parameters: (parameter_list))
+            body: (compound_statement
+              (return_statement
+                (number_literal))))))
+      (class_specifier
+        (macro_modifier
+          (identifier)
+          (argument_list
+            (number_literal)
+            (number_literal)))
+        name: (type_identifier)
+        (virtual_specifier)
+        body: (field_declaration_list
+          (access_specifier)
+          (declaration
+            (macro_modifier
+              (identifier)
+              (argument_list
+                (string_literal
+                  (string_content))))
+            (explicit_function_specifier)
+            declarator: (function_declarator
+              declarator: (identifier)
+              parameters: (parameter_list
+                (parameter_declaration
+                  (type_qualifier)
+                  type: (primitive_type)
+                  declarator: (pointer_declarator
+                    declarator: (identifier))))))
+          (declaration
+            declarator: (function_declarator
+              declarator: (identifier)
+              parameters: (parameter_list
+                (parameter_declaration
+                  type: (primitive_type)
+                  declarator: (identifier))))))))))
+
+================================================================================
+Near misses: member macros with type arguments keep their trees
+================================================================================
+
+struct Holder {
+  MACRO_TYPE(Widget) member;
+  CJSON_PUBLIC(cJSON *) item;
+  int plain();
+};
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (struct_specifier
+    name: (type_identifier)
+    body: (field_declaration_list
+      (field_declaration
+        type: (macro_type_specifier
+          name: (identifier)
+          type: (type_descriptor
+            type: (type_identifier)))
+        declarator: (field_identifier))
+      (field_declaration
+        type: (macro_type_specifier
+          name: (identifier)
+          type: (type_descriptor
+            type: (type_identifier)
+            declarator: (abstract_pointer_declarator)))
+        declarator: (field_identifier))
+      (field_declaration
+        type: (primitive_type)
+        declarator: (function_declarator
+          declarator: (field_identifier)
+          parameters: (parameter_list))))))

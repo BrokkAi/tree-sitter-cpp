@@ -5857,6 +5857,24 @@
           "type": "ALIAS",
           "content": {
             "type": "SYMBOL",
+            "name": "_decorated_constructor_or_destructor_definition"
+          },
+          "named": true,
+          "value": "function_definition"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_decorated_constructor_or_destructor_declaration"
+          },
+          "named": true,
+          "value": "declaration"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
             "name": "operator_cast_definition"
           },
           "named": true,
@@ -5917,6 +5935,18 @@
     "field_declaration": {
       "type": "SEQ",
       "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_member_leading_macro_modifiers"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
         {
           "type": "SYMBOL",
           "name": "_declaration_specifiers"
@@ -13957,6 +13987,18 @@
       "type": "SEQ",
       "members": [
         {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_member_leading_macro_modifiers"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
           "type": "SYMBOL",
           "name": "_declaration_specifiers"
         },
@@ -14205,58 +14247,217 @@
             }
           },
           {
-            "type": "CHOICE",
-            "members": [
-              {
+            "type": "SYMBOL",
+            "name": "_constructor_definition_tail"
+          }
+        ]
+      }
+    },
+    "_constructor_definition_tail": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "field_initializer_list"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "FIELD",
+              "name": "body",
+              "content": {
+                "type": "SYMBOL",
+                "name": "compound_statement"
+              }
+            }
+          ]
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "constructor_try_statement"
+          },
+          "named": true,
+          "value": "try_statement"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "default_method_clause"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "delete_method_clause"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "pure_virtual_clause"
+        }
+      ]
+    },
+    "_member_leading_macro_modifiers": {
+      "type": "PREC_DYNAMIC",
+      "value": -3,
+      "content": {
+        "type": "ALIAS",
+        "content": {
+          "type": "SYMBOL",
+          "name": "_string_attribute_macro_modifier"
+        },
+        "named": true,
+        "value": "macro_modifier"
+      }
+    },
+    "_string_attribute_macro_modifier": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_macro_name"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_string_argument_list"
+          },
+          "named": true,
+          "value": "argument_list"
+        }
+      ]
+    },
+    "_string_argument_list": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "("
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "string_literal"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "concatenated_string"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "raw_string_literal"
+                }
+              ]
+            },
+            {
+              "type": "REPEAT",
+              "content": {
                 "type": "SEQ",
                 "members": [
+                  {
+                    "type": "STRING",
+                    "value": ","
+                  },
                   {
                     "type": "CHOICE",
                     "members": [
                       {
                         "type": "SYMBOL",
-                        "name": "field_initializer_list"
+                        "name": "string_literal"
                       },
                       {
-                        "type": "BLANK"
+                        "type": "SYMBOL",
+                        "name": "concatenated_string"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "raw_string_literal"
                       }
                     ]
-                  },
-                  {
-                    "type": "FIELD",
-                    "name": "body",
-                    "content": {
-                      "type": "SYMBOL",
-                      "name": "compound_statement"
-                    }
                   }
                 ]
-              },
-              {
-                "type": "ALIAS",
-                "content": {
-                  "type": "SYMBOL",
-                  "name": "constructor_try_statement"
-                },
-                "named": true,
-                "value": "try_statement"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "default_method_clause"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "delete_method_clause"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "pure_virtual_clause"
               }
-            ]
+            }
+          ]
+        },
+        {
+          "type": "STRING",
+          "value": ")"
+        }
+      ]
+    },
+    "_decorated_constructor_or_destructor_definition": {
+      "type": "PREC_DYNAMIC",
+      "value": -2,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "SYMBOL",
+            "name": "_member_leading_macro_modifiers"
+          },
+          {
+            "type": "REPEAT",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_constructor_specifiers"
+            }
+          },
+          {
+            "type": "FIELD",
+            "name": "declarator",
+            "content": {
+              "type": "SYMBOL",
+              "name": "function_declarator"
+            }
+          },
+          {
+            "type": "SYMBOL",
+            "name": "_constructor_definition_tail"
           }
         ]
       }
+    },
+    "_decorated_constructor_or_destructor_declaration": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_member_leading_macro_modifiers"
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_constructor_specifiers"
+          }
+        },
+        {
+          "type": "FIELD",
+          "name": "declarator",
+          "content": {
+            "type": "SYMBOL",
+            "name": "function_declarator"
+          }
+        },
+        {
+          "type": "STRING",
+          "value": ";"
+        }
+      ]
     },
     "_qualified_function_declarator": {
       "type": "PREC_DYNAMIC",
@@ -19492,6 +19693,13 @@
     ],
     [
       "_class_head_macro_modifiers"
+    ],
+    [
+      "_declarator",
+      "type_specifier",
+      "macro_type_specifier",
+      "macro_modifier",
+      "_macro_name"
     ],
     [
       "sized_type_specifier"
