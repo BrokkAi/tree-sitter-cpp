@@ -353,3 +353,330 @@ int g(void) {
       (return_statement
         (identifier)
         (MISSING ";")))))
+
+================================================================================
+Function-like export macro in consecutive class heads
+================================================================================
+
+namespace api {
+class PROJECT_PUBLIC_API(2, 0) Exception : public std::exception {
+   public:
+      const char* what() const noexcept override { return m_msg.c_str(); }
+      virtual int error_code() const noexcept { return 0; }
+      struct Detail { int code; };
+      explicit Exception(std::string_view msg);
+      Exception(const char* prefix, std::string_view msg);
+   private:
+      std::string m_msg;
+};
+
+class PROJECT_PUBLIC_API(2, 0) Invalid_Argument final : public Exception {
+   public:
+      explicit Invalid_Argument(std::string_view msg);
+      ErrorType error_type() const noexcept override { return ErrorType::InvalidArgument; }
+};
+}
+
+namespace following {
+int error_code();
+}
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (namespace_definition
+    name: (namespace_identifier)
+    body: (declaration_list
+      (class_specifier
+        (macro_modifier
+          (identifier)
+          (argument_list
+            (number_literal)
+            (number_literal)))
+        name: (type_identifier)
+        (base_class_clause
+          (access_specifier)
+          (qualified_identifier
+            scope: (namespace_identifier)
+            name: (type_identifier)))
+        body: (field_declaration_list
+          (access_specifier)
+          (function_definition
+            (type_qualifier)
+            type: (primitive_type)
+            declarator: (pointer_declarator
+              declarator: (function_declarator
+                declarator: (field_identifier)
+                parameters: (parameter_list)
+                (type_qualifier)
+                (noexcept)
+                (virtual_specifier)))
+            body: (compound_statement
+              (return_statement
+                (call_expression
+                  function: (field_expression
+                    argument: (identifier)
+                    field: (field_identifier))
+                  arguments: (argument_list)))))
+          (function_definition
+            type: (primitive_type)
+            declarator: (function_declarator
+              declarator: (field_identifier)
+              parameters: (parameter_list)
+              (type_qualifier)
+              (noexcept))
+            body: (compound_statement
+              (return_statement
+                (number_literal))))
+          (field_declaration
+            type: (struct_specifier
+              name: (type_identifier)
+              body: (field_declaration_list
+                (field_declaration
+                  type: (primitive_type)
+                  declarator: (field_identifier)))))
+          (declaration
+            (explicit_function_specifier)
+            declarator: (function_declarator
+              declarator: (identifier)
+              parameters: (parameter_list
+                (parameter_declaration
+                  type: (qualified_identifier
+                    scope: (namespace_identifier)
+                    name: (type_identifier))
+                  declarator: (identifier)))))
+          (declaration
+            declarator: (function_declarator
+              declarator: (identifier)
+              parameters: (parameter_list
+                (parameter_declaration
+                  (type_qualifier)
+                  type: (primitive_type)
+                  declarator: (pointer_declarator
+                    declarator: (identifier)))
+                (parameter_declaration
+                  type: (qualified_identifier
+                    scope: (namespace_identifier)
+                    name: (type_identifier))
+                  declarator: (identifier)))))
+          (access_specifier)
+          (field_declaration
+            type: (qualified_identifier
+              scope: (namespace_identifier)
+              name: (type_identifier))
+            declarator: (field_identifier))))
+      (class_specifier
+        (macro_modifier
+          (identifier)
+          (argument_list
+            (number_literal)
+            (number_literal)))
+        name: (type_identifier)
+        (virtual_specifier)
+        (base_class_clause
+          (access_specifier)
+          (type_identifier))
+        body: (field_declaration_list
+          (access_specifier)
+          (declaration
+            (explicit_function_specifier)
+            declarator: (function_declarator
+              declarator: (identifier)
+              parameters: (parameter_list
+                (parameter_declaration
+                  type: (qualified_identifier
+                    scope: (namespace_identifier)
+                    name: (type_identifier))
+                  declarator: (identifier)))))
+          (function_definition
+            type: (type_identifier)
+            declarator: (function_declarator
+              declarator: (field_identifier)
+              parameters: (parameter_list)
+              (type_qualifier)
+              (noexcept)
+              (virtual_specifier))
+            body: (compound_statement
+              (return_statement
+                (qualified_identifier
+                  scope: (namespace_identifier)
+                  name: (identifier)))))))))
+  (namespace_definition
+    name: (namespace_identifier)
+    body: (declaration_list
+      (declaration
+        type: (primitive_type)
+        declarator: (function_declarator
+          declarator: (identifier)
+          parameters: (parameter_list))))))
+
+================================================================================
+Function-like export macro before a class without a base
+================================================================================
+
+class API_EXPORT(Widget) Widget {
+public:
+  int tail;
+};
+class API_EXPORT(Token) Token {
+protected:
+  Token(Location loc) : location(loc), string(s) {}
+  Location location;
+};
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (class_specifier
+    (macro_modifier
+      (identifier)
+      (argument_list
+        (identifier)))
+    name: (type_identifier)
+    body: (field_declaration_list
+      (access_specifier)
+      (field_declaration
+        type: (primitive_type)
+        declarator: (field_identifier))))
+  (class_specifier
+    (macro_modifier
+      (identifier)
+      (argument_list
+        (identifier)))
+    name: (type_identifier)
+    body: (field_declaration_list
+      (access_specifier)
+      (function_definition
+        declarator: (function_declarator
+          declarator: (identifier)
+          parameters: (parameter_list
+            (parameter_declaration
+              type: (type_identifier)
+              declarator: (identifier))))
+        (field_initializer_list
+          (field_initializer
+            (field_identifier)
+            (argument_list
+              (identifier)))
+          (field_initializer
+            (field_identifier)
+            (argument_list
+              (identifier))))
+        body: (compound_statement))
+      (field_declaration
+        type: (type_identifier)
+        declarator: (field_identifier)))))
+
+================================================================================
+Function-like class-head decorations followed by other decorations
+================================================================================
+
+template <class _CharT, class _Traits>
+class _LIBCPP_PREFERRED_NAME(ios) _LIBCPP_IF_WIDE_CHARACTERS(_LIBCPP_PREFERRED_NAME(wios)) basic_ios;
+
+class PROJECT_PUBLIC_API(2, 0) OTHER_MACRO Verdict : public Exception {};
+
+struct ALIGNED(16) Block { int data; };
+
+typedef union ALIGNED(8) Value { int i; float f; } Value;
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (template_declaration
+    parameters: (template_parameter_list
+      (type_parameter_declaration
+        (type_identifier))
+      (type_parameter_declaration
+        (type_identifier)))
+    (class_specifier
+      (macro_modifier
+        (identifier)
+        (argument_list
+          (identifier)))
+      (macro_modifier
+        (identifier)
+        (argument_list
+          (call_expression
+            function: (identifier)
+            arguments: (argument_list
+              (identifier)))))
+      name: (type_identifier)))
+  (class_specifier
+    (macro_modifier
+      (identifier)
+      (argument_list
+        (number_literal)
+        (number_literal)))
+    (macro_modifier
+      (identifier))
+    name: (type_identifier)
+    (base_class_clause
+      (access_specifier)
+      (type_identifier))
+    body: (field_declaration_list))
+  (struct_specifier
+    (macro_modifier
+      (identifier)
+      (argument_list
+        (number_literal)))
+    name: (type_identifier)
+    body: (field_declaration_list
+      (field_declaration
+        type: (primitive_type)
+        declarator: (field_identifier))))
+  (type_definition
+    type: (union_specifier
+      (macro_modifier
+        (identifier)
+        (argument_list
+          (number_literal)))
+      name: (type_identifier)
+      body: (field_declaration_list
+        (field_declaration
+          type: (primitive_type)
+          declarator: (field_identifier))
+        (field_declaration
+          type: (primitive_type)
+          declarator: (field_identifier))))
+    declarator: (type_identifier)))
+
+================================================================================
+Near misses: elaborated types followed by parenthesized declarators
+================================================================================
+
+typedef struct aws_huffman_code(aws_huffman_symbol_encoder_fn)(uint8_t symbol, void *userdata);
+
+struct stat st;
+
+class Widget (*factory)();
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (type_definition
+    type: (struct_specifier
+      name: (type_identifier))
+    declarator: (function_declarator
+      declarator: (parenthesized_declarator
+        (type_identifier))
+      parameters: (parameter_list
+        (parameter_declaration
+          type: (primitive_type)
+          declarator: (identifier))
+        (parameter_declaration
+          type: (primitive_type)
+          declarator: (pointer_declarator
+            declarator: (identifier))))))
+  (declaration
+    type: (struct_specifier
+      name: (type_identifier))
+    declarator: (identifier))
+  (declaration
+    type: (class_specifier
+      name: (type_identifier))
+    declarator: (function_declarator
+      declarator: (parenthesized_declarator
+        (pointer_declarator
+          declarator: (identifier)))
+      parameters: (parameter_list))))

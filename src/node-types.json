@@ -1537,6 +1537,10 @@
           "named": true
         },
         {
+          "type": "macro_modifier",
+          "named": true
+        },
+        {
           "type": "ms_declspec_modifier",
           "named": true
         },
@@ -4430,9 +4434,13 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
+        {
+          "type": "argument_list",
+          "named": true
+        },
         {
           "type": "identifier",
           "named": true
@@ -7107,6 +7115,10 @@
           "named": true
         },
         {
+          "type": "macro_modifier",
+          "named": true
+        },
+        {
           "type": "ms_declspec_modifier",
           "named": true
         },
@@ -8041,6 +8053,10 @@
         },
         {
           "type": "base_class_clause",
+          "named": true
+        },
+        {
+          "type": "macro_modifier",
           "named": true
         },
         {

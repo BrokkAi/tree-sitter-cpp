@@ -84,6 +84,8 @@ module.exports = grammar(C, {
     [$.type_specifier, $.template_type],
     [$.type_specifier, $.optional_type_parameter_declaration],
     [$.sized_type_specifier, $.macro_modifier],
+    [$._class_name, $._macro_name],
+    [$._class_head_macro_modifiers],
     [$.sized_type_specifier],
     [$.attributed_statement],
     [$._declaration_modifiers, $.attributed_statement],
@@ -344,8 +346,12 @@ module.exports = grammar(C, {
     _class_declaration_item: $ => prec.right(seq(
       choice(
         field('name', $._class_name),
+        seq($._class_head_macro_modifiers, field('name', $._class_name)),
         seq(
-          optional(field('name', $._class_name)),
+          optional(choice(
+            field('name', $._class_name),
+            seq($._class_head_macro_modifiers, field('name', $._class_name)),
+          )),
           optional($.virtual_specifier),
           optional($.base_class_clause),
           field('body', $.field_declaration_list),
@@ -457,6 +463,32 @@ module.exports = grammar(C, {
     // only at dynamic precedence -1 so it can only appear in a parse that
     // would otherwise contain an error.
     macro_modifier: $ => prec.dynamic(-1, $.identifier),
+
+    // A function-like macro invocation used as a decoration, e.g.
+    // `PROJECT_PUBLIC_API(2, 0)` in `class PROJECT_PUBLIC_API(2, 0) Widget {`.
+    // Aliased to `macro_modifier`; its arguments stay an opaque argument list.
+    // The name goes through `_macro_name` so that `struct X(fn)(int);` meets
+    // a reduce/reduce conflict (kept by GLR) instead of a shift/reduce
+    // conflict that `_class_name`'s right associativity would resolve
+    // against the ordinary declarator.
+    _function_like_macro_modifier: $ => prec.dynamic(-1, seq($._macro_name, $.argument_list)),
+
+    _macro_name: $ => $.identifier,
+
+    // Export decorations between a class key and the class name, e.g.
+    // `class PROJECT_PUBLIC_API(2, 0) Widget : public Base {`. The first
+    // decoration must be function-like: a head of object-like macros only
+    // (`class EXPORT Foo {`) already has a recovery tree that consumers rely
+    // on, and admitting it keeps a second parse of every such class body
+    // alive. Later object-like decorations are admitted, so the class is
+    // named by position in `class API(2, 0) OTHER Verdict : public Base {`.
+    _class_head_macro_modifiers: $ => seq(
+      alias($._function_like_macro_modifier, $.macro_modifier),
+      repeat(choice(
+        $.macro_modifier,
+        alias($._function_like_macro_modifier, $.macro_modifier),
+      )),
+    ),
 
     explicit_function_specifier: $ => choice(
       'explicit',
