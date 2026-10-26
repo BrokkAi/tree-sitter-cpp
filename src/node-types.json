@@ -120,6 +120,10 @@
         "named": true
       },
       {
+        "type": "qualified_identifier",
+        "named": true
+      },
+      {
         "type": "reference_declarator",
         "named": true
       },
@@ -159,6 +163,10 @@
       },
       {
         "type": "primitive_type",
+        "named": true
+      },
+      {
+        "type": "qualified_identifier",
         "named": true
       },
       {
@@ -623,6 +631,10 @@
         },
         {
           "type": "ms_call_modifier",
+          "named": true
+        },
+        {
+          "type": "qualified_identifier",
           "named": true
         }
       ]
@@ -6558,6 +6570,10 @@
         "required": true,
         "types": [
           {
+            "type": "abstract_pointer_declarator",
+            "named": true
+          },
+          {
             "type": "dependent_name",
             "named": true
           },
@@ -6579,6 +6595,10 @@
           },
           {
             "type": "operator_name",
+            "named": true
+          },
+          {
+            "type": "pointer_declarator",
             "named": true
           },
           {

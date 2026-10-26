@@ -910,6 +910,7 @@ module.exports = grammar(C, {
       original,
       $.reference_declarator,
       $.qualified_identifier,
+      alias($._member_pointer_declarator, $.qualified_identifier),
       $.template_function,
       $.operator_name,
       $.destructor_name,
@@ -920,6 +921,7 @@ module.exports = grammar(C, {
     _field_declarator: ($, original) => choice(
       original,
       alias($.reference_field_declarator, $.reference_declarator),
+      alias($._member_pointer_field_declarator, $.qualified_identifier),
       alias($.macro_modifier_field_declarator, $.macro_modifier_declarator),
       $.template_method,
       $.operator_name,
@@ -928,6 +930,7 @@ module.exports = grammar(C, {
     _type_declarator: ($, original) => choice(
       original,
       alias($.reference_type_declarator, $.reference_declarator),
+      alias($._member_pointer_type_declarator, $.qualified_identifier),
       alias($.macro_modifier_type_declarator, $.macro_modifier_declarator),
     ),
 
@@ -953,6 +956,7 @@ module.exports = grammar(C, {
     _abstract_declarator: ($, original) => choice(
       original,
       $.abstract_reference_declarator,
+      alias($._abstract_parenthesized_member_pointer_declarator, $.abstract_parenthesized_declarator),
     ),
 
     reference_declarator: $ => prec.dynamic(1, prec.right(seq(choice('&', '&&'), $._declarator))),
@@ -1693,7 +1697,59 @@ module.exports = grammar(C, {
         prec.dynamic(1, seq(optional('template'), $.identifier)),
         $.operator_name,
         $.destructor_name,
+      )),
+    ),
+
+    // A pointer-to-member declarator, e.g. `Left::*cb` in
+    // `void select(void (Left::*cb)());` or `int Left::*m;`. It has the
+    // shape of a qualified name whose last component is a pointer
+    // declarator, so the owning class stays in `scope`, with one variant per
+    // declarator context (plain, field and type). It is a declarator only:
+    // as an expression alternative of `qualified_identifier` it let
+    // `void (Left::*cb)()` parse as a functional cast called with no
+    // arguments, so prototypes with member-pointer parameters became object
+    // initializers.
+    _member_pointer_declarator: $ => seq(
+      $._scope_resolution,
+      field('name', choice(
+        alias($._member_pointer_declarator, $.qualified_identifier),
+        $.pointer_declarator,
+      )),
+    ),
+
+    _member_pointer_field_declarator: $ => seq(
+      $._scope_resolution,
+      field('name', choice(
+        alias($._member_pointer_field_declarator, $.qualified_identifier),
+        alias($.pointer_field_declarator, $.pointer_declarator),
+      )),
+    ),
+
+    _member_pointer_type_declarator: $ => seq(
+      $._scope_resolution,
+      field('name', choice(
+        alias($._member_pointer_type_declarator, $.qualified_identifier),
         $.pointer_type_declarator,
+      )),
+    ),
+
+    // The abstract form, e.g. `(Left::*)` in `R (Left::*)(int)`. It is
+    // admitted only in parentheses. As a general abstract declarator
+    // (`int Left::*` in a parameter or type argument) it is reachable after
+    // every type in a type descriptor, and the extra GLR versions dropped
+    // the type argument of `f(forward<Args>(args)...)` and made error
+    // recovery collapse whole libc++ headers into one ERROR.
+    _abstract_parenthesized_member_pointer_declarator: $ => prec(1, seq(
+      '(',
+      alias($._abstract_member_pointer_declarator, $.qualified_identifier),
+      ')',
+    )),
+
+    _abstract_member_pointer_declarator: $ => seq(
+      $._scope_resolution,
+      field('name', choice(
+        alias($._abstract_member_pointer_declarator, $.qualified_identifier),
+        $.abstract_pointer_declarator,
       )),
     ),
 

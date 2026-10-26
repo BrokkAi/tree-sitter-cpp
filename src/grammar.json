@@ -3763,6 +3763,15 @@
           "name": "qualified_identifier"
         },
         {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_member_pointer_declarator"
+          },
+          "named": true,
+          "value": "qualified_identifier"
+        },
+        {
           "type": "SYMBOL",
           "name": "template_function"
         },
@@ -3888,6 +3897,15 @@
           "type": "ALIAS",
           "content": {
             "type": "SYMBOL",
+            "name": "_member_pointer_field_declarator"
+          },
+          "named": true,
+          "value": "qualified_identifier"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
             "name": "macro_modifier_field_declarator"
           },
           "named": true,
@@ -4003,6 +4021,15 @@
           "type": "ALIAS",
           "content": {
             "type": "SYMBOL",
+            "name": "_member_pointer_type_declarator"
+          },
+          "named": true,
+          "value": "qualified_identifier"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
             "name": "macro_modifier_type_declarator"
           },
           "named": true,
@@ -4037,6 +4064,15 @@
         {
           "type": "SYMBOL",
           "name": "abstract_reference_declarator"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_abstract_parenthesized_member_pointer_declarator"
+          },
+          "named": true,
+          "value": "abstract_parenthesized_declarator"
         }
       ]
     },
@@ -18565,10 +18601,161 @@
               {
                 "type": "SYMBOL",
                 "name": "destructor_name"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "_member_pointer_declarator": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_scope_resolution"
+        },
+        {
+          "type": "FIELD",
+          "name": "name",
+          "content": {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_member_pointer_declarator"
+                },
+                "named": true,
+                "value": "qualified_identifier"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "pointer_declarator"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "_member_pointer_field_declarator": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_scope_resolution"
+        },
+        {
+          "type": "FIELD",
+          "name": "name",
+          "content": {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_member_pointer_field_declarator"
+                },
+                "named": true,
+                "value": "qualified_identifier"
+              },
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "pointer_field_declarator"
+                },
+                "named": true,
+                "value": "pointer_declarator"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "_member_pointer_type_declarator": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_scope_resolution"
+        },
+        {
+          "type": "FIELD",
+          "name": "name",
+          "content": {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_member_pointer_type_declarator"
+                },
+                "named": true,
+                "value": "qualified_identifier"
               },
               {
                 "type": "SYMBOL",
                 "name": "pointer_type_declarator"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "_abstract_parenthesized_member_pointer_declarator": {
+      "type": "PREC",
+      "value": 1,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "("
+          },
+          {
+            "type": "ALIAS",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_abstract_member_pointer_declarator"
+            },
+            "named": true,
+            "value": "qualified_identifier"
+          },
+          {
+            "type": "STRING",
+            "value": ")"
+          }
+        ]
+      }
+    },
+    "_abstract_member_pointer_declarator": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_scope_resolution"
+        },
+        {
+          "type": "FIELD",
+          "name": "name",
+          "content": {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_abstract_member_pointer_declarator"
+                },
+                "named": true,
+                "value": "qualified_identifier"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "abstract_pointer_declarator"
               }
             ]
           }
