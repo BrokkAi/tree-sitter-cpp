@@ -2272,8 +2272,8 @@ int main() {
           (parenthesized_declarator
             (qualified_identifier
               (namespace_identifier)
-              (pointer_type_declarator
-                (type_identifier))))
+              (pointer_declarator
+                (identifier))))
           (parameter_list
             (parameter_declaration
               (primitive_type)))))
@@ -2458,3 +2458,281 @@ inline constexpr MyEnum operator|(MyEnum bit0, MyEnum bit1) noexcept
         (argument_list
           (identifier))))
     (compound_statement)))
+
+================================================================================
+Pointer-to-member parameters in prototypes and definitions
+================================================================================
+
+struct Left { void run(); };
+struct Right { void run(); };
+void select(void (Left::*cb)());
+void select(void (Right::*cb)());
+void select(void (Left::*cb)()) {}
+void bind(R (Left::*)(int), R (Outer<T>::*)(int) const);
+void (Left::*pm)() = &Left::run;
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (struct_specifier
+    name: (type_identifier)
+    body: (field_declaration_list
+      (field_declaration
+        type: (primitive_type)
+        declarator: (function_declarator
+          declarator: (field_identifier)
+          parameters: (parameter_list)))))
+  (struct_specifier
+    name: (type_identifier)
+    body: (field_declaration_list
+      (field_declaration
+        type: (primitive_type)
+        declarator: (function_declarator
+          declarator: (field_identifier)
+          parameters: (parameter_list)))))
+  (declaration
+    type: (primitive_type)
+    declarator: (function_declarator
+      declarator: (identifier)
+      parameters: (parameter_list
+        (parameter_declaration
+          type: (primitive_type)
+          declarator: (function_declarator
+            declarator: (parenthesized_declarator
+              (qualified_identifier
+                scope: (namespace_identifier)
+                name: (pointer_declarator
+                  declarator: (identifier))))
+            parameters: (parameter_list))))))
+  (declaration
+    type: (primitive_type)
+    declarator: (function_declarator
+      declarator: (identifier)
+      parameters: (parameter_list
+        (parameter_declaration
+          type: (primitive_type)
+          declarator: (function_declarator
+            declarator: (parenthesized_declarator
+              (qualified_identifier
+                scope: (namespace_identifier)
+                name: (pointer_declarator
+                  declarator: (identifier))))
+            parameters: (parameter_list))))))
+  (function_definition
+    type: (primitive_type)
+    declarator: (function_declarator
+      declarator: (identifier)
+      parameters: (parameter_list
+        (parameter_declaration
+          type: (primitive_type)
+          declarator: (function_declarator
+            declarator: (parenthesized_declarator
+              (qualified_identifier
+                scope: (namespace_identifier)
+                name: (pointer_declarator
+                  declarator: (identifier))))
+            parameters: (parameter_list)))))
+    body: (compound_statement))
+  (declaration
+    type: (primitive_type)
+    declarator: (function_declarator
+      declarator: (identifier)
+      parameters: (parameter_list
+        (parameter_declaration
+          type: (type_identifier)
+          declarator: (abstract_function_declarator
+            declarator: (abstract_parenthesized_declarator
+              (qualified_identifier
+                scope: (namespace_identifier)
+                name: (abstract_pointer_declarator)))
+            parameters: (parameter_list
+              (parameter_declaration
+                type: (primitive_type)))))
+        (parameter_declaration
+          type: (type_identifier)
+          declarator: (abstract_function_declarator
+            declarator: (abstract_parenthesized_declarator
+              (qualified_identifier
+                scope: (template_type
+                  name: (type_identifier)
+                  arguments: (template_argument_list
+                    (type_descriptor
+                      type: (type_identifier))))
+                name: (abstract_pointer_declarator)))
+            parameters: (parameter_list
+              (parameter_declaration
+                type: (primitive_type)))
+            (type_qualifier))))))
+  (declaration
+    type: (primitive_type)
+    declarator: (init_declarator
+      declarator: (function_declarator
+        declarator: (parenthesized_declarator
+          (qualified_identifier
+            scope: (namespace_identifier)
+            name: (pointer_declarator
+              declarator: (identifier))))
+        parameters: (parameter_list))
+      value: (pointer_expression
+        argument: (qualified_identifier
+          scope: (namespace_identifier)
+          name: (identifier))))))
+
+================================================================================
+Pointer-to-member fields, typedefs and type descriptors
+================================================================================
+
+struct Holder {
+  int Left::*member;
+  void (Left::*callback)(int);
+};
+typedef int Left::*MemberPointer;
+int A::B::*nested;
+using Method = void (Left::*)();
+std::function<void (Left::*)(int)> slot;
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (struct_specifier
+    name: (type_identifier)
+    body: (field_declaration_list
+      (field_declaration
+        type: (primitive_type)
+        declarator: (qualified_identifier
+          scope: (namespace_identifier)
+          name: (pointer_declarator
+            declarator: (field_identifier))))
+      (field_declaration
+        type: (primitive_type)
+        declarator: (function_declarator
+          declarator: (parenthesized_declarator
+            (qualified_identifier
+              scope: (namespace_identifier)
+              name: (pointer_declarator
+                declarator: (field_identifier))))
+          parameters: (parameter_list
+            (parameter_declaration
+              type: (primitive_type)))))))
+  (type_definition
+    type: (primitive_type)
+    declarator: (qualified_identifier
+      scope: (namespace_identifier)
+      name: (pointer_type_declarator
+        declarator: (type_identifier))))
+  (declaration
+    type: (primitive_type)
+    declarator: (qualified_identifier
+      scope: (namespace_identifier)
+      name: (qualified_identifier
+        scope: (namespace_identifier)
+        name: (pointer_declarator
+          declarator: (identifier)))))
+  (alias_declaration
+    name: (type_identifier)
+    type: (type_descriptor
+      type: (primitive_type)
+      declarator: (abstract_function_declarator
+        declarator: (abstract_parenthesized_declarator
+          (qualified_identifier
+            scope: (namespace_identifier)
+            name: (abstract_pointer_declarator)))
+        parameters: (parameter_list))))
+  (declaration
+    type: (qualified_identifier
+      scope: (namespace_identifier)
+      name: (template_type
+        name: (type_identifier)
+        arguments: (template_argument_list
+          (type_descriptor
+            type: (primitive_type)
+            declarator: (abstract_function_declarator
+              declarator: (abstract_parenthesized_declarator
+                (qualified_identifier
+                  scope: (namespace_identifier)
+                  name: (abstract_pointer_declarator)))
+              parameters: (parameter_list
+                (parameter_declaration
+                  type: (primitive_type))))))))
+    declarator: (identifier)))
+
+================================================================================
+Near misses: function pointers and qualified expressions
+================================================================================
+
+// A plain function-pointer parameter stays ambiguous with a functional cast.
+void select(void (*cb)());
+void (*fp)() = nullptr;
+int product = Foo::bar * baz;
+auto method = &Left::run;
+void call(Left obj, void (Left::*pm)()) { (obj.*pm)(); }
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (comment)
+  (declaration
+    type: (primitive_type)
+    declarator: (init_declarator
+      declarator: (identifier)
+      value: (argument_list
+        (call_expression
+          function: (call_expression
+            function: (primitive_type)
+            arguments: (argument_list
+              (pointer_expression
+                argument: (identifier))))
+          arguments: (argument_list)))))
+  (expression_statement
+    (assignment_expression
+      left: (call_expression
+        function: (call_expression
+          function: (primitive_type)
+          arguments: (argument_list
+            (pointer_expression
+              argument: (identifier))))
+        arguments: (argument_list))
+      right: (null)))
+  (declaration
+    type: (primitive_type)
+    declarator: (init_declarator
+      declarator: (identifier)
+      value: (binary_expression
+        left: (qualified_identifier
+          scope: (namespace_identifier)
+          name: (identifier))
+        right: (identifier))))
+  (declaration
+    type: (placeholder_type_specifier
+      (auto))
+    declarator: (init_declarator
+      declarator: (identifier)
+      value: (pointer_expression
+        argument: (qualified_identifier
+          scope: (namespace_identifier)
+          name: (identifier)))))
+  (function_definition
+    type: (primitive_type)
+    declarator: (function_declarator
+      declarator: (identifier)
+      parameters: (parameter_list
+        (parameter_declaration
+          type: (type_identifier)
+          declarator: (identifier))
+        (parameter_declaration
+          type: (primitive_type)
+          declarator: (function_declarator
+            declarator: (parenthesized_declarator
+              (qualified_identifier
+                scope: (namespace_identifier)
+                name: (pointer_declarator
+                  declarator: (identifier))))
+            parameters: (parameter_list)))))
+    body: (compound_statement
+      (expression_statement
+        (call_expression
+          function: (parenthesized_expression
+            (field_expression
+              argument: (identifier)
+              field: (field_identifier)))
+          arguments: (argument_list))))))

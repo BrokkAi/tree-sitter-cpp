@@ -60,6 +60,7 @@ module.exports = grammar(C, {
   externals: $ => [
     $.raw_string_delimiter,
     $.raw_string_content,
+    $.macro_arguments,
   ],
 
   conflicts: $ => [
@@ -84,6 +85,8 @@ module.exports = grammar(C, {
     [$.type_specifier, $.template_type],
     [$.type_specifier, $.optional_type_parameter_declaration],
     [$.sized_type_specifier, $.macro_modifier],
+    [$._class_name, $._macro_name],
+    [$._class_head_macro_modifiers],
     [$.sized_type_specifier],
     [$.attributed_statement],
     [$._declaration_modifiers, $.attributed_statement],
@@ -174,6 +177,18 @@ module.exports = grammar(C, {
       alias($.qualified_constructor_or_destructor_definition, $.function_definition),
       alias($.operator_cast_definition, $.function_definition),
       alias($.operator_cast_declaration, $.declaration),
+      $.macro_invocation,
+    ),
+
+    // A top-level function-like macro invocation without a trailing
+    // semicolon, e.g. `LIST_TYPES(deps, struct Aggregate *, NOARG, 32)`,
+    // which expands to whole declarations. The external scanner produces the
+    // opaque `macro_arguments` only when the invocation ends its line and the
+    // next line can only start a new item, so the declarations that follow
+    // keep their own nodes and ranges.
+    macro_invocation: $ => seq(
+      field('name', $.identifier),
+      field('arguments', $.macro_arguments),
     ),
 
     _preproc_linkage_block: $ => seq(
@@ -344,8 +359,12 @@ module.exports = grammar(C, {
     _class_declaration_item: $ => prec.right(seq(
       choice(
         field('name', $._class_name),
+        seq($._class_head_macro_modifiers, field('name', $._class_name)),
         seq(
-          optional(field('name', $._class_name)),
+          optional(choice(
+            field('name', $._class_name),
+            seq($._class_head_macro_modifiers, field('name', $._class_name)),
+          )),
           optional($.virtual_specifier),
           optional($.base_class_clause),
           field('body', $.field_declaration_list),
@@ -457,6 +476,32 @@ module.exports = grammar(C, {
     // only at dynamic precedence -1 so it can only appear in a parse that
     // would otherwise contain an error.
     macro_modifier: $ => prec.dynamic(-1, $.identifier),
+
+    // A function-like macro invocation used as a decoration, e.g.
+    // `PROJECT_PUBLIC_API(2, 0)` in `class PROJECT_PUBLIC_API(2, 0) Widget {`.
+    // Aliased to `macro_modifier`; its arguments stay an opaque argument list.
+    // The name goes through `_macro_name` so that `struct X(fn)(int);` meets
+    // a reduce/reduce conflict (kept by GLR) instead of a shift/reduce
+    // conflict that `_class_name`'s right associativity would resolve
+    // against the ordinary declarator.
+    _function_like_macro_modifier: $ => prec.dynamic(-1, seq($._macro_name, $.argument_list)),
+
+    _macro_name: $ => $.identifier,
+
+    // Export decorations between a class key and the class name, e.g.
+    // `class PROJECT_PUBLIC_API(2, 0) Widget : public Base {`. The first
+    // decoration must be function-like: a head of object-like macros only
+    // (`class EXPORT Foo {`) already has a recovery tree that consumers rely
+    // on, and admitting it keeps a second parse of every such class body
+    // alive. Later object-like decorations are admitted, so the class is
+    // named by position in `class API(2, 0) OTHER Verdict : public Base {`.
+    _class_head_macro_modifiers: $ => seq(
+      alias($._function_like_macro_modifier, $.macro_modifier),
+      repeat(choice(
+        $.macro_modifier,
+        alias($._function_like_macro_modifier, $.macro_modifier),
+      )),
+    ),
 
     explicit_function_specifier: $ => choice(
       'explicit',
@@ -735,6 +780,7 @@ module.exports = grammar(C, {
       $._declaration_specifiers,
       commaSep(seq(
         field('declarator', $._field_declarator),
+        optional($._declarator_macro_modifiers),
         optional(choice(
           $.bitfield_clause,
           field('default_value', $.initializer_list),
@@ -748,6 +794,7 @@ module.exports = grammar(C, {
     inline_method_definition: $ => seq(
       $._declaration_specifiers,
       field('declarator', $._field_declarator),
+      optional($._declarator_macro_modifiers),
       choice(
         field('body', choice($.compound_statement, $.try_statement)),
         $.default_method_clause,
@@ -863,6 +910,7 @@ module.exports = grammar(C, {
       original,
       $.reference_declarator,
       $.qualified_identifier,
+      alias($._member_pointer_declarator, $.qualified_identifier),
       $.template_function,
       $.operator_name,
       $.destructor_name,
@@ -873,6 +921,7 @@ module.exports = grammar(C, {
     _field_declarator: ($, original) => choice(
       original,
       alias($.reference_field_declarator, $.reference_declarator),
+      alias($._member_pointer_field_declarator, $.qualified_identifier),
       alias($.macro_modifier_field_declarator, $.macro_modifier_declarator),
       $.template_method,
       $.operator_name,
@@ -881,6 +930,7 @@ module.exports = grammar(C, {
     _type_declarator: ($, original) => choice(
       original,
       alias($.reference_type_declarator, $.reference_declarator),
+      alias($._member_pointer_type_declarator, $.qualified_identifier),
       alias($.macro_modifier_type_declarator, $.macro_modifier_declarator),
     ),
 
@@ -906,6 +956,7 @@ module.exports = grammar(C, {
     _abstract_declarator: ($, original) => choice(
       original,
       $.abstract_reference_declarator,
+      alias($._abstract_parenthesized_member_pointer_declarator, $.abstract_parenthesized_declarator),
     ),
 
     reference_declarator: $ => prec.dynamic(1, prec.right(seq(choice('&', '&&'), $._declarator))),
@@ -933,6 +984,21 @@ module.exports = grammar(C, {
       seq(repeat1($.attribute_specifier), repeat($.type_qualifier)),
       seq(repeat($.attribute_specifier), repeat1($.type_qualifier)),
     )),
+
+    // Attribute macros after a member declarator, e.g. `ATTR("hint")` in
+    // `int f() ATTR("hint") { return 1; }` or `Q_DECL_OVERRIDE` in
+    // `void run() Q_DECL_OVERRIDE;`. Admitted only at the end of a field
+    // declaration or inline method definition. At namespace scope the same
+    // repeat lets error recovery chain a declaration that lacks its
+    // semicolon through the macro lines that follow it (`BEGIN_DECLS()`,
+    // `__OSX_AVAILABLE(...)` before the next prototype), which made many C
+    // headers recover worse. The group carries dynamic precedence -10 on
+    // top of each `macro_modifier`'s -1, so it only survives where every
+    // other parse fails.
+    _declarator_macro_modifiers: $ => prec.dynamic(-10, prec.right(repeat1(choice(
+      $.macro_modifier,
+      alias($._function_like_macro_modifier, $.macro_modifier),
+    )))),
 
     _function_exception_specification: $ => choice(
       $.noexcept,
@@ -1631,7 +1697,59 @@ module.exports = grammar(C, {
         prec.dynamic(1, seq(optional('template'), $.identifier)),
         $.operator_name,
         $.destructor_name,
+      )),
+    ),
+
+    // A pointer-to-member declarator, e.g. `Left::*cb` in
+    // `void select(void (Left::*cb)());` or `int Left::*m;`. It has the
+    // shape of a qualified name whose last component is a pointer
+    // declarator, so the owning class stays in `scope`, with one variant per
+    // declarator context (plain, field and type). It is a declarator only:
+    // as an expression alternative of `qualified_identifier` it let
+    // `void (Left::*cb)()` parse as a functional cast called with no
+    // arguments, so prototypes with member-pointer parameters became object
+    // initializers.
+    _member_pointer_declarator: $ => seq(
+      $._scope_resolution,
+      field('name', choice(
+        alias($._member_pointer_declarator, $.qualified_identifier),
+        $.pointer_declarator,
+      )),
+    ),
+
+    _member_pointer_field_declarator: $ => seq(
+      $._scope_resolution,
+      field('name', choice(
+        alias($._member_pointer_field_declarator, $.qualified_identifier),
+        alias($.pointer_field_declarator, $.pointer_declarator),
+      )),
+    ),
+
+    _member_pointer_type_declarator: $ => seq(
+      $._scope_resolution,
+      field('name', choice(
+        alias($._member_pointer_type_declarator, $.qualified_identifier),
         $.pointer_type_declarator,
+      )),
+    ),
+
+    // The abstract form, e.g. `(Left::*)` in `R (Left::*)(int)`. It is
+    // admitted only in parentheses. As a general abstract declarator
+    // (`int Left::*` in a parameter or type argument) it is reachable after
+    // every type in a type descriptor, and the extra GLR versions dropped
+    // the type argument of `f(forward<Args>(args)...)` and made error
+    // recovery collapse whole libc++ headers into one ERROR.
+    _abstract_parenthesized_member_pointer_declarator: $ => prec(1, seq(
+      '(',
+      alias($._abstract_member_pointer_declarator, $.qualified_identifier),
+      ')',
+    )),
+
+    _abstract_member_pointer_declarator: $ => seq(
+      $._scope_resolution,
+      field('name', choice(
+        alias($._abstract_member_pointer_declarator, $.qualified_identifier),
+        $.abstract_pointer_declarator,
       )),
     ),
 

@@ -120,6 +120,10 @@
         "named": true
       },
       {
+        "type": "qualified_identifier",
+        "named": true
+      },
+      {
         "type": "reference_declarator",
         "named": true
       },
@@ -159,6 +163,10 @@
       },
       {
         "type": "primitive_type",
+        "named": true
+      },
+      {
+        "type": "qualified_identifier",
         "named": true
       },
       {
@@ -623,6 +631,10 @@
         },
         {
           "type": "ms_call_modifier",
+          "named": true
+        },
+        {
+          "type": "qualified_identifier",
           "named": true
         }
       ]
@@ -1534,6 +1546,10 @@
         },
         {
           "type": "base_class_clause",
+          "named": true
+        },
+        {
+          "type": "macro_modifier",
           "named": true
         },
         {
@@ -4426,13 +4442,43 @@
     }
   },
   {
+    "type": "macro_invocation",
+    "named": true,
+    "fields": {
+      "arguments": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "macro_arguments",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "macro_modifier",
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
+        {
+          "type": "argument_list",
+          "named": true
+        },
         {
           "type": "identifier",
           "named": true
@@ -5531,6 +5577,10 @@
           "named": true
         },
         {
+          "type": "macro_invocation",
+          "named": true
+        },
+        {
           "type": "module_declaration",
           "named": true
         },
@@ -5699,6 +5749,10 @@
           "named": true
         },
         {
+          "type": "macro_invocation",
+          "named": true
+        },
+        {
           "type": "module_declaration",
           "named": true
         },
@@ -5835,6 +5889,10 @@
         },
         {
           "type": "linkage_specification",
+          "named": true
+        },
+        {
+          "type": "macro_invocation",
           "named": true
         },
         {
@@ -6070,6 +6128,10 @@
           "named": true
         },
         {
+          "type": "macro_invocation",
+          "named": true
+        },
+        {
           "type": "module_declaration",
           "named": true
         },
@@ -6239,6 +6301,10 @@
         },
         {
           "type": "linkage_specification",
+          "named": true
+        },
+        {
+          "type": "macro_invocation",
           "named": true
         },
         {
@@ -6504,6 +6570,10 @@
         "required": true,
         "types": [
           {
+            "type": "abstract_pointer_declarator",
+            "named": true
+          },
+          {
             "type": "dependent_name",
             "named": true
           },
@@ -6525,6 +6595,10 @@
           },
           {
             "type": "operator_name",
+            "named": true
+          },
+          {
+            "type": "pointer_declarator",
             "named": true
           },
           {
@@ -7107,6 +7181,10 @@
           "named": true
         },
         {
+          "type": "macro_modifier",
+          "named": true
+        },
+        {
           "type": "ms_declspec_modifier",
           "named": true
         },
@@ -7679,6 +7757,10 @@
           "named": true
         },
         {
+          "type": "macro_invocation",
+          "named": true
+        },
+        {
           "type": "module_declaration",
           "named": true
         },
@@ -8041,6 +8123,10 @@
         },
         {
           "type": "base_class_clause",
+          "named": true
+        },
+        {
+          "type": "macro_modifier",
           "named": true
         },
         {
@@ -8883,6 +8969,10 @@
   {
     "type": "long",
     "named": false
+  },
+  {
+    "type": "macro_arguments",
+    "named": true
   },
   {
     "type": "module",
