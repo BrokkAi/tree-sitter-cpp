@@ -60,6 +60,7 @@ module.exports = grammar(C, {
   externals: $ => [
     $.raw_string_delimiter,
     $.raw_string_content,
+    $.macro_arguments,
   ],
 
   conflicts: $ => [
@@ -176,6 +177,18 @@ module.exports = grammar(C, {
       alias($.qualified_constructor_or_destructor_definition, $.function_definition),
       alias($.operator_cast_definition, $.function_definition),
       alias($.operator_cast_declaration, $.declaration),
+      $.macro_invocation,
+    ),
+
+    // A top-level function-like macro invocation without a trailing
+    // semicolon, e.g. `LIST_TYPES(deps, struct Aggregate *, NOARG, 32)`,
+    // which expands to whole declarations. The external scanner produces the
+    // opaque `macro_arguments` only when the invocation ends its line and the
+    // next line can only start a new item, so the declarations that follow
+    // keep their own nodes and ranges.
+    macro_invocation: $ => seq(
+      field('name', $.identifier),
+      field('arguments', $.macro_arguments),
     ),
 
     _preproc_linkage_block: $ => seq(

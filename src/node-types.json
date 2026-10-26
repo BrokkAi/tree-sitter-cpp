@@ -4430,6 +4430,32 @@
     }
   },
   {
+    "type": "macro_invocation",
+    "named": true,
+    "fields": {
+      "arguments": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "macro_arguments",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "macro_modifier",
     "named": true,
     "fields": {},
@@ -5539,6 +5565,10 @@
           "named": true
         },
         {
+          "type": "macro_invocation",
+          "named": true
+        },
+        {
           "type": "module_declaration",
           "named": true
         },
@@ -5707,6 +5737,10 @@
           "named": true
         },
         {
+          "type": "macro_invocation",
+          "named": true
+        },
+        {
           "type": "module_declaration",
           "named": true
         },
@@ -5843,6 +5877,10 @@
         },
         {
           "type": "linkage_specification",
+          "named": true
+        },
+        {
+          "type": "macro_invocation",
           "named": true
         },
         {
@@ -6078,6 +6116,10 @@
           "named": true
         },
         {
+          "type": "macro_invocation",
+          "named": true
+        },
+        {
           "type": "module_declaration",
           "named": true
         },
@@ -6247,6 +6289,10 @@
         },
         {
           "type": "linkage_specification",
+          "named": true
+        },
+        {
+          "type": "macro_invocation",
           "named": true
         },
         {
@@ -7691,6 +7737,10 @@
           "named": true
         },
         {
+          "type": "macro_invocation",
+          "named": true
+        },
+        {
           "type": "module_declaration",
           "named": true
         },
@@ -8899,6 +8949,10 @@
   {
     "type": "long",
     "named": false
+  },
+  {
+    "type": "macro_arguments",
+    "named": true
   },
   {
     "type": "module",

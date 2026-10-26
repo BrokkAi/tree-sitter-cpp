@@ -680,3 +680,191 @@ class Widget (*factory)();
         (pointer_declarator
           declarator: (identifier)))
       parameters: (parameter_list))))
+
+================================================================================
+Semicolon-free macro envelopes between C declarations (CycloneDDS)
+================================================================================
+
+struct Aggregate;
+
+#define NOARG
+LIST_TYPES(deps, struct Aggregate *, NOARG, 32)
+#undef NOARG
+
+struct Context { int value; };
+struct Visit { int value; };
+
+LIST_DECLS(static, deps, struct Aggregate *, unused)
+LIST_CODE(static, deps, struct Aggregate *, 0, alloc, free)
+
+static void target(struct Context *ctx, int first, int second, struct Visit *visit);
+
+static struct Context *restore(struct Aggregate *value) {
+  return (struct Context *) value;
+}
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (struct_specifier
+    name: (type_identifier))
+  (preproc_def
+    name: (identifier))
+  (macro_invocation
+    name: (identifier)
+    arguments: (macro_arguments))
+  (preproc_call
+    directive: (preproc_directive)
+    argument: (preproc_arg))
+  (struct_specifier
+    name: (type_identifier)
+    body: (field_declaration_list
+      (field_declaration
+        type: (primitive_type)
+        declarator: (field_identifier))))
+  (struct_specifier
+    name: (type_identifier)
+    body: (field_declaration_list
+      (field_declaration
+        type: (primitive_type)
+        declarator: (field_identifier))))
+  (macro_invocation
+    name: (identifier)
+    arguments: (macro_arguments))
+  (macro_invocation
+    name: (identifier)
+    arguments: (macro_arguments))
+  (declaration
+    (storage_class_specifier)
+    type: (primitive_type)
+    declarator: (function_declarator
+      declarator: (identifier)
+      parameters: (parameter_list
+        (parameter_declaration
+          type: (struct_specifier
+            name: (type_identifier))
+          declarator: (pointer_declarator
+            declarator: (identifier)))
+        (parameter_declaration
+          type: (primitive_type)
+          declarator: (identifier))
+        (parameter_declaration
+          type: (primitive_type)
+          declarator: (identifier))
+        (parameter_declaration
+          type: (struct_specifier
+            name: (type_identifier))
+          declarator: (pointer_declarator
+            declarator: (identifier))))))
+  (function_definition
+    (storage_class_specifier)
+    type: (struct_specifier
+      name: (type_identifier))
+    declarator: (pointer_declarator
+      declarator: (function_declarator
+        declarator: (identifier)
+        parameters: (parameter_list
+          (parameter_declaration
+            type: (struct_specifier
+              name: (type_identifier))
+            declarator: (pointer_declarator
+              declarator: (identifier))))))
+    body: (compound_statement
+      (return_statement
+        (cast_expression
+          type: (type_descriptor
+            type: (struct_specifier
+              name: (type_identifier))
+            declarator: (abstract_pointer_declarator))
+          value: (identifier))))))
+
+================================================================================
+Semicolon-free macro envelopes with comments, literals and chains
+================================================================================
+
+DECLARE_TABLE(")", /* ( */ '(',
+              "multi-line") // trailing comment
+typedef int handle_t;
+
+FIRST_PASS(Widget)
+SECOND_PASS(Widget, 2)
+extern int registered;
+
+Q_DECLARE_METATYPE(Widget)
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (macro_invocation
+    name: (identifier)
+    arguments: (macro_arguments))
+  (comment)
+  (type_definition
+    type: (primitive_type)
+    declarator: (type_identifier))
+  (macro_invocation
+    name: (identifier)
+    arguments: (macro_arguments))
+  (macro_invocation
+    name: (identifier)
+    arguments: (macro_arguments))
+  (declaration
+    (storage_class_specifier)
+    type: (primitive_type)
+    declarator: (identifier))
+  (macro_invocation
+    name: (identifier)
+    arguments: (macro_arguments)))
+
+================================================================================
+Near misses: function-like macros that begin ordinary declarations
+================================================================================
+
+TEST(Suite, Name)
+{
+}
+
+CJSON_PUBLIC(cJSON *)
+cJSON_Parse(const char *value);
+
+LDAP_F( int )
+ldap_debug;
+
+FOO(x);
+
+--------------------------------------------------------------------------------
+
+(translation_unit
+  (function_definition
+    declarator: (function_declarator
+      declarator: (identifier)
+      parameters: (parameter_list
+        (parameter_declaration
+          type: (type_identifier))
+        (parameter_declaration
+          type: (type_identifier))))
+    body: (compound_statement))
+  (declaration
+    type: (macro_type_specifier
+      name: (identifier)
+      type: (type_descriptor
+        type: (type_identifier)
+        declarator: (abstract_pointer_declarator)))
+    declarator: (function_declarator
+      declarator: (identifier)
+      parameters: (parameter_list
+        (parameter_declaration
+          (type_qualifier)
+          type: (primitive_type)
+          declarator: (pointer_declarator
+            declarator: (identifier))))))
+  (declaration
+    type: (macro_type_specifier
+      name: (identifier)
+      type: (type_descriptor
+        type: (primitive_type)))
+    declarator: (identifier))
+  (expression_statement
+    (call_expression
+      function: (identifier)
+      arguments: (argument_list
+        (identifier)))))

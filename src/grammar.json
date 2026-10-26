@@ -165,6 +165,10 @@
           },
           "named": true,
           "value": "declaration"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "macro_invocation"
         }
       ]
     },
@@ -11358,6 +11362,27 @@
         }
       ]
     },
+    "macro_invocation": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "FIELD",
+          "name": "name",
+          "content": {
+            "type": "SYMBOL",
+            "name": "identifier"
+          }
+        },
+        {
+          "type": "FIELD",
+          "name": "arguments",
+          "content": {
+            "type": "SYMBOL",
+            "name": "macro_arguments"
+          }
+        }
+      ]
+    },
     "_preproc_linkage_block": {
       "type": "SEQ",
       "members": [
@@ -19412,6 +19437,10 @@
     {
       "type": "SYMBOL",
       "name": "raw_string_content"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "macro_arguments"
     }
   ],
   "inline": [
