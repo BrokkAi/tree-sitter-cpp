@@ -5906,6 +5906,18 @@
                       "type": "CHOICE",
                       "members": [
                         {
+                          "type": "SYMBOL",
+                          "name": "_declarator_macro_modifiers"
+                        },
+                        {
+                          "type": "BLANK"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "CHOICE",
+                      "members": [
+                        {
                           "type": "CHOICE",
                           "members": [
                             {
@@ -5974,6 +5986,18 @@
                               "type": "SYMBOL",
                               "name": "_field_declarator"
                             }
+                          },
+                          {
+                            "type": "CHOICE",
+                            "members": [
+                              {
+                                "type": "SYMBOL",
+                                "name": "_declarator_macro_modifiers"
+                              },
+                              {
+                                "type": "BLANK"
+                              }
+                            ]
                           },
                           {
                             "type": "CHOICE",
@@ -13912,6 +13936,18 @@
           "type": "CHOICE",
           "members": [
             {
+              "type": "SYMBOL",
+              "name": "_declarator_macro_modifiers"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
               "type": "FIELD",
               "name": "body",
               "content": {
@@ -14835,6 +14871,35 @@
             ]
           }
         ]
+      }
+    },
+    "_declarator_macro_modifiers": {
+      "type": "PREC_DYNAMIC",
+      "value": -10,
+      "content": {
+        "type": "PREC_RIGHT",
+        "value": 0,
+        "content": {
+          "type": "REPEAT1",
+          "content": {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "macro_modifier"
+              },
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_function_like_macro_modifier"
+                },
+                "named": true,
+                "value": "macro_modifier"
+              }
+            ]
+          }
+        }
       }
     },
     "_function_exception_specification": {

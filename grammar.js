@@ -780,6 +780,7 @@ module.exports = grammar(C, {
       $._declaration_specifiers,
       commaSep(seq(
         field('declarator', $._field_declarator),
+        optional($._declarator_macro_modifiers),
         optional(choice(
           $.bitfield_clause,
           field('default_value', $.initializer_list),
@@ -793,6 +794,7 @@ module.exports = grammar(C, {
     inline_method_definition: $ => seq(
       $._declaration_specifiers,
       field('declarator', $._field_declarator),
+      optional($._declarator_macro_modifiers),
       choice(
         field('body', choice($.compound_statement, $.try_statement)),
         $.default_method_clause,
@@ -978,6 +980,21 @@ module.exports = grammar(C, {
       seq(repeat1($.attribute_specifier), repeat($.type_qualifier)),
       seq(repeat($.attribute_specifier), repeat1($.type_qualifier)),
     )),
+
+    // Attribute macros after a member declarator, e.g. `ATTR("hint")` in
+    // `int f() ATTR("hint") { return 1; }` or `Q_DECL_OVERRIDE` in
+    // `void run() Q_DECL_OVERRIDE;`. Admitted only at the end of a field
+    // declaration or inline method definition. At namespace scope the same
+    // repeat lets error recovery chain a declaration that lacks its
+    // semicolon through the macro lines that follow it (`BEGIN_DECLS()`,
+    // `__OSX_AVAILABLE(...)` before the next prototype), which made many C
+    // headers recover worse. The group carries dynamic precedence -10 on
+    // top of each `macro_modifier`'s -1, so it only survives where every
+    // other parse fails.
+    _declarator_macro_modifiers: $ => prec.dynamic(-10, prec.right(repeat1(choice(
+      $.macro_modifier,
+      alias($._function_like_macro_modifier, $.macro_modifier),
+    )))),
 
     _function_exception_specification: $ => choice(
       $.noexcept,
