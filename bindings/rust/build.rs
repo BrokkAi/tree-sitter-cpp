@@ -5,6 +5,7 @@ fn main() {
     c_config
         .std("c11")
         .include(src_dir)
+        .define("TREE_SITTER_REUSE_ALLOCATOR", None)
         .define("tree_sitter_cpp", "brokk_tree_sitter_cpp")
         .define(
             "tree_sitter_cpp_external_scanner_create",

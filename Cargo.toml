@@ -28,6 +28,10 @@ include = [
 [lib]
 path = "bindings/rust/lib.rs"
 
+[[test]]
+name = "allocator_boundary"
+path = "bindings/rust/tests/allocator_boundary.rs"
+
 [dependencies]
 tree-sitter-language = "0.1"
 tree-sitter = { version = ">=0.25.10, <0.27", optional = true }
