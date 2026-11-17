@@ -71,3 +71,16 @@ check the full corpus and highlighting suite.
 [ci]: https://img.shields.io/github/actions/workflow/status/BrokkAi/tree-sitter-cpp/ci.yml?logo=github&label=CI
 [crates]: https://img.shields.io/crates/v/brokk-tree-sitter-cpp?logo=rust
 [docs]: https://img.shields.io/docsrs/brokk-tree-sitter-cpp?logo=docs.rs
+
+### Allocator hooks
+
+The Rust crate's optional `reuse-allocator` feature compiles its external
+scanner to use the linked Tree-sitter runtime's allocator hooks. It is off
+by default so grammar-only consumers do not need to link that runtime.
+Consumers enabling the feature must link the same Tree-sitter runtime that
+provides `ts_current_malloc`, `ts_current_calloc`, `ts_current_realloc`, and
+`ts_current_free`. They must install any allocator hooks before creating
+Tree-sitter objects, following the runtime's allocator safety contract.
+
+Run `cargo test` for the default grammar-only linking control and
+`cargo test --features reuse-allocator` for the allocator-hook boundary test.

@@ -31,6 +31,15 @@ path = "bindings/rust/lib.rs"
 [[test]]
 name = "allocator_boundary"
 path = "bindings/rust/tests/allocator_boundary.rs"
+required-features = ["reuse-allocator"]
+
+[[test]]
+name = "grammar_without_runtime"
+path = "bindings/rust/tests/grammar_without_runtime.rs"
+
+[features]
+# Consumers enabling this must link the Tree-sitter runtime allocator symbols.
+reuse-allocator = []
 
 [dependencies]
 tree-sitter-language = "0.1"
